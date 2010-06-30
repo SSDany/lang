@@ -1,0 +1,58 @@
+fr
+fr-Latn
+fr-fra # Extended tag
+fr-Latn-FR
+fr-Latn-419
+fr-FR
+ax-TZ # Not in the registry, but well-formed
+fr-shadok # Variant
+fr-y-myext-myext2
+fra-Latn # ISO 639 can be 3-letters
+fra
+fra-FX
+i-klingon # grandfathered with singleton
+I-kLINgon # tags are case-insensitive...
+no-bok # grandfathered without singleton
+fr-Lat # Extended
+mn-Cyrl-MN
+mN-cYrL-Mn
+fr-Latn-CA
+en-US
+fr-Latn-CA
+i-enochian # Grand fathered
+x-fr-CH 
+sr-Latn-CS
+es-419
+sl-nedis
+de-CH-1996
+de-Latg-1996
+sl-IT-nedis
+en-a-bbb-x-a-ccc
+de-a-value
+en-Latn-GB-boont-r-extended-sequence-x-private
+en-x-US
+az-Arab-x-AZE-derbend
+es-Latn-CO-x-private
+en-US-boont
+ab-x-abc-x-abc # anything goes after x
+ab-x-abc-a-a # ditto
+i-default # grandfathered
+i-klingon # grandfathered
+abcd-Latn # Language of 4 chars reserved for future use
+AaBbCcDd-x-y-any-x # Language of 5-8 chars, registered
+en
+de-AT
+es-419
+de-CH-1901
+sr-Cyrl
+sr-Cyrl-CS
+sl-Latn-IT-rozaj
+en-US-x-twain
+zh-cmn
+zh-cmn-Hant
+zh-cmn-Hant-HK
+zh-gan
+zh-yue-Hant-HK
+xr-lxs-qut # extlangS
+xr-lqt-qu # extlang + region
+xr-p-lze # Extension
