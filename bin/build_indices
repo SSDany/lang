@@ -1,0 +1,115 @@
+#!/usr/bin/env ruby
+
+dir = File.expand_path(File.dirname(__FILE__) + '/../lib')
+$:.unshift(dir) unless $:.include?(dir)
+require 'lang/subtags'
+
+require 'net/http'
+require 'tempfile'
+
+module Lang #:nodoc:
+  module Subtags #:nodoc:
+    class Registry
+
+      NAME_REGEX = /(?:#{SUBTAG}|#{TAG}):\s*([\w-]+)\s*/.freeze
+      TYPE_REGEX = /#{TYPE}:\s*(\w+)\s*/.freeze
+
+      def exists?
+        File.exists?(REGISTRY_PATH)
+      end
+
+      def download(uri)
+        temp = Tempfile.new("registry")
+        FileUtils.mkdir_p(File.dirname(REGISTRY_PATH)) unless exists?
+        _download(uri) { |chunk| temp << chunk }
+        temp.fsync
+        temp.close && FileUtils.mv(temp.path, REGISTRY_PATH)
+      end
+
+      def build_indices
+        return false unless exists?
+        STDOUT << "Building indices\n"
+        _calculate_indices
+        _calculate_boundaries
+
+        temp = Tempfile.new("indices")
+        @boundaries.each { |boundary| temp << "#{boundary.join(":")}\n" }
+        @boundaries.each { |boundary|
+          template = "%-#{boundary[-3]}s%#{boundary[-2]}d\n"
+          @indices[boundary.first].to_a.sort.each { |k,v| temp << template % [k,v]; }
+        }
+
+        temp.fsync
+        temp.close && FileUtils.mv(temp.path, "#{REGISTRY_PATH}.indices")
+        STDOUT << "Done\n"
+        true
+      end
+
+      private
+
+      def _download(uri)
+        STDOUT << "Downloading #{uri}\n"
+        Net::HTTP.get_response(uri) do |response|
+          total, size = response['Content-Length'].to_i, 0
+          response.read_body do |chunk|
+            size += chunk.size
+            yield(chunk) if block_given?
+            STDOUT << "\r%d%% done (%d of %d)" % [size*100/total, size, total]
+            STDOUT.flush
+          end
+        end
+        STDOUT << "\n"
+        nil
+      end
+
+      def _calculate_boundaries
+        calculate_indices unless @indices
+        offset = 0
+        @boundaries = @indices.keys.sort{ |a,b| a.to_s <=> b.to_s }.map do |kind|
+          segment   = @indices[kind]
+          boundary  = []
+          boundary << kind
+          boundary << offset
+          boundary << segment.size - 1
+          boundary << segment.keys.map{ |s| s.size }.max
+          boundary << segment.values.max.to_s.size
+          boundary << boundary[-1] + boundary[-2] + 1
+          offset   += segment.size * boundary.last
+          boundary
+        end
+        true
+      end
+
+      def _calculate_indices
+        count = 0
+        kind, name = nil, nil
+        @indices = {}
+        File.open(REGISTRY_PATH, File::RDONLY) do |f|
+          f.each_line do |l|
+            if TYPE_REGEX === l
+              kind = $1.to_sym
+              @indices[kind] ||= {}
+            elsif kind && NAME_REGEX === l
+              name = $1.downcase
+              @indices[kind][name] = count
+            elsif kind && name && l == SEPARATOR
+              kind, name = nil, nil
+            end
+            count += l.size
+          end
+        end
+        #STDOUT << "#{count}\n"
+        true
+      end
+
+    end
+  end
+end
+
+if __FILE__ == $0
+  registry = Lang::Subtags::Registry.new
+  registry.download(URI("http://www.iana.org/assignments/language-subtag-registry"))
+  registry.build_indices
+end
+
+# EOF
