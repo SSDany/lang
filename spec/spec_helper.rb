@@ -8,6 +8,7 @@ begin
 
   SPEC_ROOT = Pathname(__FILE__).dirname.expand_path
   FIXTURES_DIR = SPEC_ROOT.join('fixtures')
+  require SPEC_ROOT + 'support/suite'
 
   dir = SPEC_ROOT.parent.join('lib').to_s
   $:.unshift(dir) unless $:.include?(dir)
