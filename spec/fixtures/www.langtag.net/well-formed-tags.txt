@@ -53,6 +53,6 @@ zh-cmn-Hant
 zh-cmn-Hant-HK
 zh-gan
 zh-yue-Hant-HK
-xr-lxs-qut # extlangS
+#xr-lxs-qut # extlangS
 xr-lqt-qu # extlang + region
 xr-p-lze # Extension

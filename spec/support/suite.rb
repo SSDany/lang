@@ -3,6 +3,7 @@ module Suite #:nodoc:
   def suite(path, &block)
     suite = FIXTURES_DIR.join(path)
     File.open(suite, File::RDONLY).each_line do |snippet|
+      next if /^\s*#|^\s*$/ === snippet
       snippet,comment = snippet.split("#",2)
       snippet.strip!
       comment.strip! if comment

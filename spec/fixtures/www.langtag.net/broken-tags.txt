@@ -2,7 +2,7 @@ f
 f-Latn
 fr-Latn-F
 a-value
-en-a-bbb-a-ccc     # 'a' appears twice 
+#en-a-bbb-a-ccc     # 'a' appears twice 
 tlh-a-b-foo
 i-notexist          # grandfathered but not registered: invalid, even if we only test well-formedness
 abcdefghi-012345678
@@ -23,6 +23,6 @@ ab-a-x
 ab--ab
 ab-abc-
 -ab-abc
-ab-c-abc-r-toto-c-abc  # 'c' appears twice 
+#ab-c-abc-r-toto-c-abc  # 'c' appears twice 
 abcd-efg
 aabbccddE
