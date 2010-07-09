@@ -1,7 +1,5 @@
 begin
 
-  gem 'rdoc', '>=2.3'
-  require 'rdoc'
   require 'rake/rdoctask'
 
   desc 'Build RDoc'
@@ -9,8 +7,8 @@ begin
     rdoc.rdoc_dir = "doc"
     rdoc.main     = "README.rdoc"
     rdoc.title    = "Lang #{Lang::VERSION} Documentation"
-    rdoc.options  << %w(--charset=utf-8 --force-update --line-numbers)
-    rdoc.rdoc_files.add FileList['lib/**/*.rb','README.rdoc']
+    rdoc.options  << "--charset" << "utf-8" << "--force-update" << "--line-numbers"
+    rdoc.rdoc_files.add FileList['lib/**/*.rb', 'README.rdoc']
   end
 
   task :clobber => "clobber_rdoc"
