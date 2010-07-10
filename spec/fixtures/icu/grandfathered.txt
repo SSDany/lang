@@ -1,0 +1,37 @@
+#all of the grandfathered codes; first the really goofy ones. Cased oddly for an extra test.
+En-Gb-Oed
+I-Ami
+I-Bnn
+I-Default
+I-Enochian
+I-Hak
+I-Klingon
+I-Lux
+I-Mingo
+I-Navajo
+I-Pwn
+I-Tao
+I-Tay
+I-Tsu
+Sgn-Be-Fr
+Sgn-Be-Nl
+Sgn-Ch-De
+
+#now the ones that are well-formed, but currently invalid
+art-lojban
+cel-gaulish
+en-boont
+en-scouse
+no-bok
+no-nyn
+zh-cmn
+zh-cmn-Hans
+zh-cmn-Hant
+zh-gan
+zh-guoyu
+zh-hakka
+zh-min
+zh-min-nan
+zh-wuu
+zh-xiang
+zh-yue
