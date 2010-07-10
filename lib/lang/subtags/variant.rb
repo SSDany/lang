@@ -1,12 +1,9 @@
 module Lang #:nodoc:
-  module Subtags #:nodoc:
-    class Variant < Subtag
+  module Subtags
+    # Holds data about variant subtags.
+    class Variant < Entry
 
-      attr_accessor :prefixes
-
-      def allows_prefix?(prefix)
-        @prefixes && @prefixes.include?(prefix)
-      end
+      attr_reader :prefixes
 
       def add_prefix(prefix)
         @prefixes ||= []

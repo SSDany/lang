@@ -1,12 +1,15 @@
 module Lang #:nodoc:
-  module Subtags #:nodoc:
-    class Extlang < Subtag
+  module Subtags
+    # Holds data about extlang subtags.
+    class Extlang < Entry
 
       attr_accessor :macrolanguage,
-                    :prefix
+                    :suppress_script,
+                    :prefix,
+                    :scope
 
       def macro
-        Subtags.subtag(:language,macrolanguage)
+        Subtags.entry(:language, macrolanguage) if macrolanguage
       end
 
     end

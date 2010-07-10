@@ -1,5 +1,5 @@
 require 'thread'
-require 'lang/subtags/subtag'
+require 'lang/subtags/entry'
 require 'lang/subtags/language'
 require 'lang/subtags/extlang'
 require 'lang/subtags/script'
@@ -31,26 +31,27 @@ module Lang #:nodoc:
     COLON_SPLITTER  = RUBY_VERSION < '1.9.1' ? /\:/.freeze : COLON
 
     SYM2CLASS = {}
-    Subtag.subclasses.each do |subclass|
-      sym = subclass.to_s.gsub(/^.*::/,'').downcase.to_sym
-      SYM2CLASS[sym] = subclass
+    Entry.subclasses.each do |subclass|
+      meth = subclass.to_s.gsub(/^.*::/,'')
+      kind = meth.downcase.to_sym
+      SYM2CLASS[kind] = subclass
       class_eval(<<-EOS, __FILE__, __LINE__ + 1)
-      def self.#{sym}(s)
-        subtag(:#{sym},s)
+      def self.#{meth}(s)
+        entry(:#{kind},s)
       end
       EOS
     end
 
-    @_subtags = {}
-    def self.subtag(kind,s)
+    def self.entry(kind, snippet)
       return nil unless SYM2CLASS.include?(kind)
-      @_subtags[kind] ||= {}
-      return @_subtags[kind][s] if @_subtags[kind].key?(s = s.downcase)
-      LOCK.synchronize { @_subtags[kind][s] = _load_subtag(kind,s) }
-    end
-
-    def self.clear
-      LOCK.synchronize { @_subtags.clear }
+      klass = SYM2CLASS[kind]
+      LOCK.synchronize {
+        if klass.entries.key?(snippet) ||
+           klass.entries.key?(snippet = snippet.downcase)
+          return klass.entries[snippet]
+        end
+        klass.entries[snippet] = _load_entry(kind, snippet)
+      }
     end
 
     def self.close
@@ -60,9 +61,9 @@ module Lang #:nodoc:
       }
     end
 
-    def self._search(kind,s)
+    def self._search(kind, snippet)
       lower, offset, upper, t, i, r = 0, *_boundaries[kind]
-      target = s.ljust(t)
+      target = snippet.ljust(t)
       until upper < lower
         middle = (lower+upper)/2
         _indices.seek(offset + middle*r, IO::SEEK_SET)
@@ -78,8 +79,8 @@ module Lang #:nodoc:
       nil
     end
 
-    def self._load_subtag(kind,s)
-      amount = _search(kind,s)
+    def self._load_entry(kind, snippet)
+      amount = _search(kind, snippet)
       return nil unless amount
       _registry.seek(amount, IO::SEEK_SET)
       thing = SYM2CLASS[kind].new
@@ -107,10 +108,10 @@ module Lang #:nodoc:
       thing
     end
 
-    REGISTRY_PATH = File.join(File.dirname(__FILE__), "data", "language-subtag-registry")
+    REGISTRY_PATH = File.join(File.dirname(__FILE__), "data", "language-subtags")
 
     def self._registry
-      @_registry ||= File.open(REGISTRY_PATH, File::RDONLY)
+      @_registry ||= File.open("#{REGISTRY_PATH}.registry", File::RDONLY)
     end
 
     def self._indices
@@ -119,19 +120,17 @@ module Lang #:nodoc:
 
     def self._boundaries
       return @_boundaries if @_boundaries
-      _indices.seek(0,IO::SEEK_SET)
       @_boundaries = {}
-      Subtag.subclasses.size.times do
-        boundary = _indices.readline.split(COLON_SPLITTER)
+      File.open("#{REGISTRY_PATH}.boundaries", File::RDONLY).each_line do |line|
+        boundary = line.split(COLON_SPLITTER)
         @_boundaries[boundary.shift.to_sym] = boundary.map { |b| b.to_i }
       end
-      @_boundaries.each { |_,b| b[0] += _indices.pos } #normalize
       @_boundaries
     end
 
     class << self
       private :_boundaries, :_indices, :_registry
-      private :_load_subtag
+      private :_load_entry
       private :_search
     end
 

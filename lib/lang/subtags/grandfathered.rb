@@ -1,6 +1,7 @@
 module Lang #:nodoc:
-  module Subtags #:nodoc:
-    class Grandfathered < Subtag
+  module Subtags
+    # Holds data about grandfathered registrations.
+    class Grandfathered < Entry
     end
   end
 end

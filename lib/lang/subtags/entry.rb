@@ -1,6 +1,6 @@
 module Lang #:nodoc:
-  module Subtags #:nodoc:
-    class Subtag
+  module Subtags
+    class Entry
 
       attr_accessor :name,
                     :preferred_value,
@@ -9,11 +9,11 @@ module Lang #:nodoc:
                     :comments
 
       def deprecated?
-        @deprecated_at.nil?
+        !@deprecated_at.nil?
       end
 
       def description
-        @descriptions ? @descriptions.join("\n") : nil
+        @descriptions.join("\n") if @descriptions
       end
 
       def add_description(chunk)
@@ -27,6 +27,10 @@ module Lang #:nodoc:
 
       def self.subclasses
         @subclasses ||= []
+      end
+
+      def self.entries
+        @entries ||= {}
       end
 
     end

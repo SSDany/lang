@@ -1,6 +1,7 @@
 module Lang #:nodoc:
-  module Subtags #:nodoc:
-    class Script < Subtag
+  module Subtags
+    # Holds data about script subtags.
+    class Script < Entry
     end
   end
 end

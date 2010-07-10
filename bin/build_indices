@@ -15,37 +15,48 @@ module Lang #:nodoc:
       TYPE_REGEX = /#{TYPE}:\s*(\w+)\s*/.freeze
 
       def exists?
-        File.exists?(REGISTRY_PATH)
+        File.exists?("#{REGISTRY_PATH}.registry")
       end
 
       def download(uri)
-        temp = Tempfile.new("registry")
         FileUtils.mkdir_p(File.dirname(REGISTRY_PATH)) unless exists?
-        _download(uri) { |chunk| temp << chunk }
-        temp.fsync
-        temp.close && FileUtils.mv(temp.path, REGISTRY_PATH)
+        _write("registry") { |temp| _download(uri) { |chunk| temp << chunk }}
       end
 
       def build_indices
         return false unless exists?
+
         STDOUT << "Building indices\n"
         _calculate_indices
         _calculate_boundaries
 
-        temp = Tempfile.new("indices")
-        @boundaries.each { |boundary| temp << "#{boundary.join(":")}\n" }
-        @boundaries.each { |boundary|
-          template = "%-#{boundary[-3]}s%#{boundary[-2]}d\n"
-          @indices[boundary.first].to_a.sort.each { |k,v| temp << template % [k,v]; }
-        }
+        _write("indices") do |temp|
+          @boundaries.each do |boundary|
+            template = "%-#{boundary[-3]}s%#{boundary[-2]}d\n"
+            @indices[boundary.first].to_a.sort.each { |k,v| temp << template % [k,v]; }
+          end
+        end
 
-        temp.fsync
-        temp.close && FileUtils.mv(temp.path, "#{REGISTRY_PATH}.indices")
+        _write("boundaries") do |temp|
+          @boundaries.each do |boundary|
+            temp << "#{boundary.join(":")}\n"
+          end
+        end
+
         STDOUT << "Done\n"
         true
       end
 
       private
+
+      def _write(dest, &block)
+        temp = Tempfile.new(dest)
+        temp.binmode
+        yield(temp) if block_given?
+        temp.close
+        FileUtils.mv(temp.path, "#{REGISTRY_PATH}.#{dest}")
+        nil
+      end
 
       def _download(uri)
         STDOUT << "Downloading #{uri}\n"
@@ -84,7 +95,7 @@ module Lang #:nodoc:
         count = 0
         kind, name = nil, nil
         @indices = {}
-        File.open(REGISTRY_PATH, File::RDONLY) do |f|
+        File.open("#{REGISTRY_PATH}.registry", File::RDONLY) do |f|
           f.each_line do |l|
             if TYPE_REGEX === l
               kind = $1.to_sym

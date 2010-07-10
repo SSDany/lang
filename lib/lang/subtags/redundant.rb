@@ -1,6 +1,7 @@
 module Lang #:nodoc:
-  module Subtags #:nodoc:
-    class Redundant < Subtag
+  module Subtags
+    # Holds data about redundant tags.
+    class Redundant < Entry
     end
   end
 end
