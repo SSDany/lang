@@ -260,4 +260,55 @@ REGISTRY
 
 end
 
+describe Lang::Subtags, ".Grandfathered" do
+
+  before :all do
+    @registry = StringIO.new <<-REGISTRY
+Type: grandfathered
+Tag: i-navajo
+Description: Navajo
+Added: 1997-09-19
+Deprecated: 2000-02-18
+Preferred-Value: nv
+%%
+REGISTRY
+  end
+
+  extend MemoizationHelper
+  stub_memoization_for Lang::Subtags::Grandfathered
+
+  describe "when called with a string 'i-navajo'" do
+
+    it "loads a grandfathered tag 'i-navajo' from a local copy of the IANA registry" do
+      Lang::Subtags.should_receive(:_search).and_return(0)
+      Lang::Subtags.should_receive(:_registry).exactly(8).times.and_return(@registry)
+      @grandfathered = Lang::Subtags::Grandfathered('i-navajo')
+    end
+
+    it "does not perform search twice" do
+      Lang::Subtags.should_not_receive(:_search)
+      Lang::Subtags.should_not_receive(:_registry)
+      @grandfathered = Lang::Subtags::Grandfathered('i-navajo')
+    end
+
+    it "works case-insensitively" do
+      Lang::Subtags.should_not_receive(:_search)
+      Lang::Subtags.should_not_receive(:_registry)
+      @grandfathered = Lang::Subtags::Grandfathered('i-nAvAjo')
+    end
+
+    after :each do
+      @grandfathered.should be_an_instance_of Lang::Subtags::Grandfathered
+      @grandfathered.name.should == 'i-navajo'
+      @grandfathered.added_at.should == '1997-09-19'
+      @grandfathered.deprecated_at.should == '2000-02-18'
+      @grandfathered.preferred_value.should == 'nv'
+      @grandfathered.description.should == 'Navajo'
+      @grandfathered.should be_deprecated
+    end
+
+  end
+
+end
+
 # EOF
