@@ -606,4 +606,65 @@ describe Lang::Tag, "'el-x-koine'" do
 
 end
 
+describe Lang::Tag, ".parse" do
+
+  it "returns the argument passed, if it is already a Lang::Tag" do
+    @langtag = Lang::Tag.parse('de-DE')
+    Lang::Tag.parse(@langtag).should be_equal @langtag
+  end
+
+  it "creates a new Lang::Tag object otherwise" do
+    @langtag = Lang::Tag.new
+    @langtag.should_receive(:recompose).with('de-DE').and_return @langtag # proxy to #recompose
+    Lang::Tag.should_receive(:new).and_return(@langtag)
+    Lang::Tag.parse('de-DE').should == @langtag
+  end
+
+end
+
+describe Lang::Tag, "#recompose" do
+  extend Suite
+
+  before :each do
+    @langtag = Lang::Tag.new
+  end
+
+  it "raises a TypeError when called with 42 (which is not stringable)" do
+    lambda { @langtag.recompose(42) }.should raise_error TypeError, %r{Can't convert Fixnum into String}
+  end
+
+  it "raises an ArgumentError when called with 'zh-hakka' ('grandfathered' Language-Tag)" do
+    lambda { @langtag.recompose('zh-hakka') }.
+    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+  end
+
+  it "raises an ArgumentError when called with 'i-navajo' ('grandfathered' and irregular Language-Tag)" do
+    lambda { @langtag.recompose('i-navajo') }.
+    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+  end
+
+  it "raises an ArgumentError when called with 'x-private-sequence' ('privateuse' Language-Tag)" do
+    lambda { @langtag.recompose('x-private-sequence') }.
+    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+  end
+
+  suite('www.langtag.net/broken-tags.txt') do |snippet,_|
+    it "raises an ArgumentError when called with '#{snippet}' (ill-formed Language-Tag)" do
+      lambda { @langtag.recompose(snippet) }.
+      should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+    end
+  end
+
+  it "raises an ArgumentError when called with 'en-a-some-ext-a-another-ext' (repeated singletons)" do
+    lambda { @langtag.recompose('en-a-some-ext-a-another-ext') }.
+    should raise_error Lang::Tag::InvalidComponentError, %r{Repeated singletons: a}
+  end
+
+  it "raises an ArgumentError when called with 'sl-rozaj-rozaj' (repeated variants)" do
+    lambda { @langtag.recompose('sl-rozaj-rozaj') }.
+    should raise_error Lang::Tag::InvalidComponentError, %r{Repeated variants: rozaj}
+  end
+
+end
+
 # EOF
