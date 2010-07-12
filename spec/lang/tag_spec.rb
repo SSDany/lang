@@ -535,4 +535,75 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
 
 end
 
+# privateuse
+describe Lang::Tag, "'el-x-koine'" do
+
+  before :each do
+    @langtag = Lang::Tag('el-x-koine')
+  end
+
+  it "has an 'x-koine' privateuse sequence" do
+    @langtag.privateuse_sequence.should == 'x-koine'
+  end
+
+  it "exposes privateuse components as an Array" do
+    @langtag.privateuse.should be_an_instance_of ::Array
+    @langtag.privateuse.size.should == 1
+    @langtag.privateuse.should == ['koine']
+  end
+
+  it "exposes privateuse components in a composition" do
+    @langtag.composition.should == 'el-x-koine'
+    @langtag.tag.should == 'el-x-koine'
+  end
+
+  describe "when assigns nil to the privateuse" do
+
+    it "has no privateuse sequence" do
+      @langtag.privateuse_sequence = nil
+      @langtag.privateuse_sequence.should be_nil
+      @langtag.privateuse.should be_nil
+    end
+
+    it "removes an old privateuse sequence from a composition" do
+      @langtag.privateuse_sequence = nil
+      @langtag.composition.should == 'el'
+      @langtag.tag.should == 'el'
+    end
+
+  end
+
+  describe "when assigns the 'ill-formed' sequence to the privateuse" do
+    it "raises an InvalidComponentError (ill-formed sequence)" do
+      lambda {
+        @langtag.privateuse_sequence = 'ill-formed'
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{"ill-formed" does not conform to the 'privateuse' ABNF}
+    end
+  end
+
+  describe "when assigns the 'x-Attic' sequence to the privateuse" do
+
+    before :each do
+      @langtag.privateuse_sequence = 'x-Attic'
+    end
+
+    it "has an 'x-Attic' privateuse sequence" do
+      @langtag.privateuse_sequence.should == 'x-Attic'
+    end
+
+    it "exposes new privateuse components as an Array" do
+      @langtag.privateuse.should be_an_instance_of ::Array
+      @langtag.privateuse.size.should == 1
+      @langtag.privateuse.should == ['Attic']
+    end
+
+    it "exposes new privateuse components in a composition" do
+      @langtag.composition.should == 'el-x-attic'
+      @langtag.tag.should == 'el-x-Attic'
+    end
+
+  end
+
+end
+
 # EOF
