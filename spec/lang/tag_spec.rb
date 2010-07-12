@@ -740,4 +740,52 @@ describe Lang::Tag, "#recompose" do
 
 end
 
+describe Lang::Tag, "#subtags_count" do
+
+  it "considers the tag 'hak' cosisits of the one subtag" do
+    Lang::Tag('hak').subtags_count.should == 1
+  end
+
+  it "considers the tag 'de-DE' consists of 2 subtags" do
+    Lang::Tag('de-DE').subtags_count.should == 2
+  end
+
+  it "considers the tag 'de-Latn-DE' consists of 3 subtags" do
+    Lang::Tag('de-Latn-DE').subtags_count.should == 3
+  end
+
+  it "considers the tag 'de-Latn-DE-u-attr-co-phonebk' consists of 7 subtags" do
+    Lang::Tag('de-Latn-DE-u-attr-co-phonebk').subtags_count.should == 7
+  end
+
+  it "considers the tag 'de-Latn-DE-u-attr-co-phonebk-x-private-use' consists of 10 subtags" do
+    Lang::Tag('de-Latn-DE-u-attr-co-phonebk-x-private-use').subtags_count.should == 10
+  end
+
+end
+
+describe Lang::Tag, "#length" do
+
+  it "considers the tag 'hak' cosisits of 3 chars" do
+    Lang::Tag('hak').length.should == 3
+  end
+
+  it "considers the tag 'de-DE' consists of 5 chars" do
+    Lang::Tag('de-DE').length.should == 5
+  end
+
+  it "considers the tag 'de-Latn-DE' consists of 10 chars" do
+    Lang::Tag('de-Latn-DE').length.should == 10
+  end
+
+  it "considers the tag 'de-Latn-DE-u-attr-co-phonebk' consists of 28 chars" do
+    Lang::Tag('de-Latn-DE-u-attr-co-phonebk').length.should == 28
+  end
+
+  it "considers the tag 'de-Latn-DE-u-attr-co-phonebk-x-private-use' consists of 42 chars" do
+    Lang::Tag('de-Latn-DE-u-attr-co-phonebk-x-private-use').length.should == 42
+  end
+
+end
+
 # EOF
