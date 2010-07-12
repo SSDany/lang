@@ -1,6 +1,10 @@
 begin
 
-  require 'rake/rdoctask'
+  begin
+    require 'hanna/rdoctask'
+  rescue LoadError
+    require 'rake/rdoctask'
+  end
 
   desc 'Build RDoc'
   Rake::RDocTask.new(:rdoc) do |rdoc|
