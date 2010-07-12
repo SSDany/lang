@@ -145,6 +145,66 @@ describe Lang::Tag, "'jsl'" do
 
 end
 
+# script
+describe Lang::Tag, "'zh-Hans'" do
+
+  before :each do
+    @langtag = Lang::Tag('zh-Hans')
+  end
+
+  it "has a script 'Hans' (Hangul simplified)" do
+    @langtag.script.should == 'Hans'
+  end
+
+  it "exposes a script in a composition" do
+    @langtag.composition.should == 'zh-hans'
+    @langtag.tag.should == 'zh-Hans'
+  end
+
+  describe "when assigns a 'Hant' to the script" do
+
+    before :each do
+      @langtag.script = 'Hant'
+    end
+
+    it "has a script 'Hant' (Hangul traditional)" do
+      @langtag.script.should == 'Hant'
+    end
+
+    it "exposes a new script in a composition" do
+      @langtag.composition.should == 'zh-hant'
+      @langtag.tag.should == 'zh-Hant'
+    end
+
+  end
+
+  describe "when assigns nil to the script" do
+
+    before :each do
+      @langtag.script = nil
+    end
+
+    it "has no script" do
+      @langtag.script.should be_nil
+    end
+
+    it "removes an old script from a composition" do
+      @langtag.composition.should == 'zh'
+      @langtag.tag.should == 'zh'
+    end
+
+  end
+
+  describe "when assigns the 'ill-formed' sequence to the script" do
+    it "raises an InvalidComponentError (ill-formed sequence)" do
+      lambda {
+        @langtag.script = 'ill-formed'
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{"ill-formed" does not conform to the 'script' ABNF}
+    end
+  end
+
+end
+
 # region
 describe Lang::Tag, "'es-ES'" do
 
