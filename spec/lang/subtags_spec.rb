@@ -311,4 +311,51 @@ REGISTRY
 
 end
 
+describe Lang::Subtags, ".Redundant" do
+
+  before :all do
+    @registry = StringIO.new <<-REGISTRY
+Type: redundant
+Tag: de-AT-1996
+Description: German, Austrian variant, orthography of 1996
+Added: 2001-07-17
+%%
+REGISTRY
+  end
+
+  extend MemoizationHelper
+  stub_memoization_for Lang::Subtags::Redundant
+
+  describe "when called with a string 'de-AT-1996'" do
+
+    it "loads a redundant tag 'de-AT-1996' from a local copy of the IANA registry" do
+      Lang::Subtags.should_receive(:_search).and_return(0)
+      Lang::Subtags.should_receive(:_registry).exactly(6).times.and_return(@registry)
+      @redundant = Lang::Subtags::Redundant('de-AT-1996')
+    end
+
+    it "does not perform search twice" do
+      Lang::Subtags.should_not_receive(:_search)
+      Lang::Subtags.should_not_receive(:_registry)
+      @redundant = Lang::Subtags::Redundant('de-AT-1996')
+    end
+
+    it "works case-insensitively" do
+      Lang::Subtags.should_not_receive(:_search)
+      Lang::Subtags.should_not_receive(:_registry)
+      @redundant = Lang::Subtags::Redundant('dE-aT-1996')
+    end
+
+    after :each do
+      @redundant.should be_an_instance_of Lang::Subtags::Redundant
+      @redundant.name.should == 'de-AT-1996'
+      @redundant.added_at.should == '2001-07-17'
+      @redundant.description.should == 'German, Austrian variant, orthography of 1996'
+      @redundant.should_not be_deprecated
+    end
+
+  end
+
+end
+
 # EOF
