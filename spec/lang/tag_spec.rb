@@ -145,6 +145,66 @@ describe Lang::Tag, "'jsl'" do
 
 end
 
+# region
+describe Lang::Tag, "'es-ES'" do
+
+  before :each do
+    @langtag = Lang::Tag('es-ES')
+  end
+
+  it "has a region 'ES' (Spain)" do
+    @langtag.region.should == 'ES'
+  end
+
+  it "exposes a region in a composition" do
+    @langtag.composition.should == 'es-es'
+    @langtag.tag.should == 'es-ES'
+  end
+
+  describe "when assigns a '419' to the region" do
+
+    before :each do
+      @langtag.region = '419'
+    end
+
+    it "has a region '419' (Spanish appropriate to the UN-defined Latin America and Caribbean region)" do
+      @langtag.region.should == '419'
+    end
+
+    it "exposes a new region in a composition" do
+      @langtag.composition.should == 'es-419'
+      @langtag.tag.should == 'es-419'
+    end
+
+  end
+
+  describe "when assigns nil to the region" do
+
+    before :each do
+      @langtag.region = nil
+    end
+
+    it "has no region" do
+      @langtag.region.should be_nil
+    end
+
+    it "removes an old region from a composition" do
+      @langtag.composition.should == 'es'
+      @langtag.tag.should == 'es'
+    end
+
+  end
+
+  describe "when assigns the 'ill-formed' sequence to the region" do
+    it "raises an InvalidComponentError (ill-formed sequence)" do
+      lambda {
+        @langtag.region = 'ill-formed'
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{"ill-formed" does not conform to the 'region' ABNF}
+    end
+  end
+
+end
+
 # variants
 describe Lang::Tag, "'sl-rozaj-biske-1994'" do
 
