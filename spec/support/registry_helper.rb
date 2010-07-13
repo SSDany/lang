@@ -1,8 +1,12 @@
-module MemoizationHelper
+module RegistryHelper
 
   def stub_memoization_for(*klasses)
 
     klasses = Lang::Subtags::Entry.subclasses & klasses
+
+    before :all do
+      #Lang::Subtags.stub!(:registry_path).and_return(FIXTURES_DIR.join('fake/language-subtags'))
+    end
 
     before :all do
       @entries = {}

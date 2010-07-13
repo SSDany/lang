@@ -36,13 +36,13 @@ module Lang #:nodoc:
       kind = meth.downcase.to_sym
       SYM2CLASS[kind] = subclass
       class_eval(<<-EOS, __FILE__, __LINE__ + 1)
-      def self.#{meth}(s)
+      def #{meth}(s)
         entry(:#{kind},s)
       end
       EOS
     end
 
-    def self.entry(kind, snippet)
+    def entry(kind, snippet)
       return nil unless SYM2CLASS.include?(kind)
       klass = SYM2CLASS[kind]
       LOCK.synchronize {
@@ -54,14 +54,14 @@ module Lang #:nodoc:
       }
     end
 
-    def self.close
+    def close
       LOCK.synchronize {
         _registry.close
         _indices.close
       }
     end
 
-    def self._search(kind, snippet)
+    def _search(kind, snippet)
       lower, offset, upper, t, i, r = 0, *_boundaries[kind]
       target = snippet.ljust(t)
       until upper < lower
@@ -79,12 +79,12 @@ module Lang #:nodoc:
       nil
     end
 
-    def self._load_entry(kind, snippet)
+    def _load_entry(kind, snippet)
       amount = _search(kind, snippet)
       return nil unless amount
       _registry.seek(amount, IO::SEEK_SET)
       thing = SYM2CLASS[kind].new
-      until _registry.readline == SEPARATOR
+      until _registry.eof? || _registry.readline == SEPARATOR
 
         line = $_
         thing.comments << $' && next if CONTINUE_REGEX === line
@@ -108,25 +108,29 @@ module Lang #:nodoc:
       thing
     end
 
-    REGISTRY_PATH = File.join(File.dirname(__FILE__), "data", "language-subtags")
-
-    def self._registry
-      @_registry ||= File.open("#{REGISTRY_PATH}.registry", File::RDONLY)
+    def registry_path
+      @registry_path ||= File.join(File.dirname(__FILE__), "data", "language-subtags")
     end
 
-    def self._indices
-      @_indices ||= File.open("#{REGISTRY_PATH}.indices", File::RDONLY)
+    def _registry
+      @_registry ||= File.open("#{registry_path}.registry", File::RDONLY)
     end
 
-    def self._boundaries
+    def _indices
+      @_indices ||= File.open("#{registry_path}.indices", File::RDONLY)
+    end
+
+    def _boundaries
       return @_boundaries if @_boundaries
       @_boundaries = {}
-      File.open("#{REGISTRY_PATH}.boundaries", File::RDONLY).each_line do |line|
+      File.open("#{registry_path}.boundaries", File::RDONLY).each_line do |line|
         boundary = line.split(COLON_SPLITTER)
         @_boundaries[boundary.shift.to_sym] = boundary.map { |b| b.to_i }
       end
       @_boundaries
     end
+
+    extend self
 
     class << self
       private :_boundaries, :_indices, :_registry

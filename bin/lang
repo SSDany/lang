@@ -7,19 +7,23 @@ require 'lang/subtags'
 require 'net/http'
 require 'tempfile'
 
-module Lang #:nodoc:
-  module Subtags #:nodoc:
+module Lang
+  module Subtags
     class Registry
 
       NAME_REGEX = /(?:#{SUBTAG}|#{TAG}):\s*([\w-]+)\s*/.freeze
       TYPE_REGEX = /#{TYPE}:\s*(\w+)\s*/.freeze
 
+      def initialize(path = Lang::Subtags.registry_path)
+        @path = path
+      end
+
       def exists?
-        File.exists?("#{REGISTRY_PATH}.registry")
+        File.exists?("#{@path}.registry")
       end
 
       def download(uri)
-        FileUtils.mkdir_p(File.dirname(REGISTRY_PATH)) unless exists?
+        FileUtils.mkdir_p(File.dirname(@path)) unless exists?
         _write("registry") { |temp| _download(uri) { |chunk| temp << chunk }}
       end
 
@@ -54,7 +58,7 @@ module Lang #:nodoc:
         temp.binmode
         yield(temp) if block_given?
         temp.close
-        FileUtils.mv(temp.path, "#{REGISTRY_PATH}.#{dest}")
+        FileUtils.mv(temp.path, "#{@path}.#{dest}")
         nil
       end
 
@@ -95,7 +99,7 @@ module Lang #:nodoc:
         count = 0
         kind, name = nil, nil
         @indices = {}
-        File.open("#{REGISTRY_PATH}.registry", File::RDONLY) do |f|
+        File.open("#{@path}.registry", File::RDONLY) do |f|
           f.each_line do |l|
             if TYPE_REGEX === l
               kind = $1.to_sym
@@ -118,9 +122,17 @@ module Lang #:nodoc:
 end
 
 if __FILE__ == $0
+
+  command = ARGV.shift
+  unless %w(reindex update).include?(command)
+    STDERR << "unknown command: #{command.inspect}\n"
+    exit 1
+  end
+
   registry = Lang::Subtags::Registry.new
-  registry.download(URI("http://www.iana.org/assignments/language-subtag-registry"))
+  registry.download(URI("http://www.iana.org/assignments/language-subtag-registry")) if command == 'update' || !registry.exists?
   registry.build_indices
+
 end
 
 # EOF
