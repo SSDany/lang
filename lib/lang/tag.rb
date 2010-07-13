@@ -6,7 +6,7 @@ module Lang
     Lang::Tag.parse(thing)
   end
 
-  # Handles 'langtag' ABNF production.
+  # Handles the 'langtag' ABNF production.
   class Tag
 
     class Error < StandardError
@@ -64,8 +64,6 @@ module Lang
       'zh-xiang'    => 'hsn'
     ).freeze
 
-    #GRANDFATHERED_REGEX = /^(?:#{GRANDFATHERED.keys.join('|')})(?=-|$)/io.freeze
-
     WILDCARD                              = '*'.freeze
     HYPHEN                                = '-'.freeze
     HYPHEN_SPLITTER                       = RUBY_VERSION < '1.9.1' ? /-/.freeze : HYPHEN
@@ -111,6 +109,8 @@ module Lang
       def irregular?(snippet)
         IRREGULAR.key?(snippet) || IRREGULAR.key?(snippet.downcase)
       end
+
+      # GRANDFATHERED_REGEX = /^(?:#{GRANDFATHERED.keys.join('|')})(?=-|$)/io.freeze
 
       # Checks if the +String+ passed represents a 'grandfathered' Language-Tag.
       # Works case-insensitively.
@@ -187,12 +187,12 @@ module Lang
       end
       @primary = nil
       @extlang = nil
-      #decompose_language
       dirty
       validate
     end
 
     # Returns a primary language subtag.
+    #
     def primary
       return nil unless @language
       decompose_language unless @primary
@@ -200,18 +200,21 @@ module Lang
     end
 
     # Returns a second component of the extended language, if any.
+    #
     def extlang
       return nil unless @language
       decompose_language unless @primary
       @extlang
     end
 
+    # Decomposes a language component.
+    #
     def decompose_language
       @primary, @extlang = @language.split(HYPHEN_SPLITTER, 2)
       nil
     end
 
-    private :decompose_language
+    protected :decompose_language
 
     #--
     # RFC 5646, sec. 2.2.3:
@@ -263,6 +266,14 @@ module Lang
 
     # Sets the sequence of variants for this langtag.
     #
+    # ==== Example
+    #
+    #   tag = Lang::Tag('ja')
+    #   tag.variants_sequence = 'hepburn-heploc'
+    #   tag.variants #=> ['hepburn', 'heploc']
+    #   tag.has_variant?('heploc') #=> true
+    #   tag.has_variant?('nedis') #=> false
+    #
     def variants_sequence=(value)
       @variants_sequence = value ? value.to_str : nil
       if @variants_sequence && VARIANTS_SEQUENCE_REGEX !~ "#{HYPHEN}#{@variants_sequence}"
@@ -275,15 +286,14 @@ module Lang
 
     # Variants of the lantag, each *downcased*
     # for case-insensitive comparison purposes.
+    #
     attr_reader :variants
 
     def decompose_variants
       if @variants_sequence
         @variants = @variants_sequence.downcase.split(HYPHEN_SPLITTER)
         if @variants.uniq!
-          vs = @variants_sequence.downcase.split(HYPHEN_SPLITTER)
-          vs = @variants.select { |v| vs.grep(v).size > 1 }
-          raise InvalidComponentError, "Repeated variants: #{vs.join(", ")}."
+          raise InvalidComponentError, "#{@variants_sequence.inspect} sequence includes repeated variants."
         end
       else
         @variants = nil
@@ -291,7 +301,7 @@ module Lang
       nil
     end
 
-    private :decompose_variants
+    protected :decompose_variants
 
     # Checks if self has a variant passed.
     # Works case-insensitively.
@@ -326,9 +336,7 @@ module Lang
         subtags = @extensions_sequence.downcase.split(EXTENSIONS_SEQUENCE_SPLITTER)[1..-1]
         @extensions = Hash[*subtags]
         if @extensions.size * 2 != subtags.size
-          es = @extensions.keys.select { |s| subtags.grep(s).size > 1 }
-          es.sort!
-          raise InvalidComponentError, "Repeated singletons: #{es.join(", ")}."
+          raise InvalidComponentError, "#{@extensions_sequence.inspect} sequence includes repeated singletons."
         end
       else
         @extensions = nil
@@ -336,7 +344,7 @@ module Lang
       nil
     end
 
-    private :decompose_extensions
+    protected :decompose_extensions
 
     # Builds an *ordered* list of *downcased* singletons.
     #
@@ -386,9 +394,11 @@ module Lang
 
     def privateuse
       return nil unless @privateuse_sequence
-      @privateuse ||= @privateuse_sequence.split(HYPHEN)[1..-1]
+      @privateuse ||= @privateuse_sequence.downcase.split(HYPHEN)[1..-1]
     end
 
+    # Sets the 'privateuse' sequence for this langtag.
+    #
     def privateuse_sequence=(value)
       @privateuse_sequence = value ? value.to_str : nil
       if @privateuse_sequence && PRIVATEUSE_REGEX !~ @privateuse_sequence
@@ -432,8 +442,8 @@ module Lang
     #
     def matched_by_extended_range?(range)
 
-      subtags = ary.dup #FIXME: faster than split?
-      subranges = range.downcase.split(HYPHEN)
+      subtags = ary.dup
+      subranges = range.to_str.downcase.split(HYPHEN)
 
       subrange = subranges.shift
       subtag = subtags.shift
@@ -558,7 +568,36 @@ module Lang
 
     private :validate
 
-    #:section: Other
+    #:section: Formatting
+
+    def nicecase!
+
+      if @language
+        @language.downcase!
+        @primary = nil
+        @extlang = nil
+      end
+
+      # [ISO639-1] recommends that language codes be written in lowercase ('mn' Mongolian).
+      # [ISO15924] recommends that script codes use lowercase with the initial letter capitalized ('Cyrl' Cyrillic).
+      # [ISO3166-1] recommends that country codes be capitalized ('MN' Mongolia).
+
+      @script.capitalize!             if @script
+      @region.upcase!                 if @region
+      @variants_sequence.downcase!    if @variants_sequence
+      @extensions_sequence.downcase!  if @extensions_sequence
+      @privateuse_sequence.downcase!  if @privateuse_sequence
+
+      @tag = nil
+    end
+
+    def nicecase
+      duplicated = self.dup
+      duplicated.nicecase!
+      duplicated
+    end
+
+    #:section: Miscellaneous
 
     def inspect
       sprintf("#<%s:%#0x %s>", self.class.to_s, self.object_id, self.to_s)
@@ -584,7 +623,7 @@ module Lang
     alias :to_str :to_s
 
     def dup
-      self.class.new.recompose(tag) #FIXME
+      self.class.new.recompose(tag)
     end
 
     def to_a
@@ -627,7 +666,6 @@ module Lang
         @privateuse           = nil
         @privateuse_sequence  = $'[1..-1]
 
-        #decompose_language
         decompose_variants
         decompose_extensions
 

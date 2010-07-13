@@ -126,4 +126,16 @@ describe "wildcard" do
 
 end
 
+describe "42" do
+
+  it "does not match the language-tag 'de'" do
+    Lang::Tag('de').should_not be_matched_by_extended_range(42)
+  end
+
+  it "does not match the language-tag 'de-DE'" do
+    Lang::Tag('de-DE').should_not be_matched_by_extended_range(42)
+  end
+
+end
+
 # EOF

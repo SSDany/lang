@@ -68,6 +68,10 @@ describe Lang::Tag, "'de-DE'" do
     @langtag.should be_eql Lang::Tag('de-DE')
   end
 
+  it "has a same hash as a langtag 'de-DE'" do
+    @langtag.hash.should == Lang::Tag('de-DE').hash
+  end
+
   it "is not exactly equal to the langtag 'dE-De'" do
     @langtag.should_not be_eql Lang::Tag('dE-De')
   end
@@ -413,7 +417,7 @@ describe Lang::Tag, "'sl-rozaj-biske-1994'" do
     it "raises an InvalidComponentError (repeated variants)" do
       lambda {
         @langtag.variants_sequence = 'rozaj-biske-rozaj-biske'
-      }.should raise_error Lang::Tag::InvalidComponentError, %r{Repeated variants: rozaj, biske}
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{repeated variants}
     end
   end
 
@@ -421,7 +425,7 @@ describe Lang::Tag, "'sl-rozaj-biske-1994'" do
     it "raises an InvalidComponentError (repeated variants)" do
       lambda {
         @langtag.variants_sequence = 'Rozaj-Biske-rozaj-biske'
-      }.should raise_error Lang::Tag::InvalidComponentError, %r{Repeated variants: rozaj, biske}
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{repeated variants}
     end
   end
 
@@ -503,7 +507,7 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
     it "raises an InvalidComponentError (repeated singletons)" do
       lambda {
         @langtag.extensions_sequence = 'v-macron-v-colon'
-      }.should raise_error Lang::Tag::InvalidComponentError, %r{Repeated singletons: v}
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{repeated singletons}
     end
   end
 
@@ -511,7 +515,7 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
     it "raises an InvalidComponentError (repeated singletons)" do
       lambda {
         @langtag.extensions_sequence = 'v-macron-V-colon-p-kana-P-hyphen'
-      }.should raise_error Lang::Tag::InvalidComponentError, %r{Repeated singletons: p, v}
+      }.should raise_error Lang::Tag::InvalidComponentError, %r{repeated singletons}
     end
   end
 
@@ -663,7 +667,7 @@ describe Lang::Tag, "'el-x-koine'" do
     it "exposes new privateuse components as an Array" do
       @langtag.privateuse.should be_an_instance_of ::Array
       @langtag.privateuse.size.should == 1
-      @langtag.privateuse.should == ['Attic']
+      @langtag.privateuse.should == ['attic']
     end
 
     it "exposes new privateuse components in a composition" do
@@ -730,12 +734,12 @@ describe Lang::Tag, "#recompose" do
 
   it "raises an ArgumentError when called with 'en-a-some-ext-a-another-ext' (repeated singletons)" do
     lambda { @langtag.recompose('en-a-some-ext-a-another-ext') }.
-    should raise_error Lang::Tag::InvalidComponentError, %r{Repeated singletons: a}
+    should raise_error Lang::Tag::InvalidComponentError, %r{repeated singletons}
   end
 
   it "raises an ArgumentError when called with 'sl-rozaj-rozaj' (repeated variants)" do
     lambda { @langtag.recompose('sl-rozaj-rozaj') }.
-    should raise_error Lang::Tag::InvalidComponentError, %r{Repeated variants: rozaj}
+    should raise_error Lang::Tag::InvalidComponentError, %r{repeated variants}
   end
 
 end
@@ -784,6 +788,108 @@ describe Lang::Tag, "#length" do
 
   it "considers the tag 'de-Latn-DE-u-attr-co-phonebk-x-private-use' consists of 42 chars" do
     Lang::Tag('de-Latn-DE-u-attr-co-phonebk-x-private-use').length.should == 42
+  end
+
+end
+
+describe Lang::Tag, "#validate" do
+
+  before :each do
+    @langtag = Lang::Tag.new
+  end
+
+  it "does not allow langtags without language" do
+    lambda { @langtag.script = 'Latn'
+    }.should raise_error Lang::Tag::InvalidComponentError, %r{Primary subtag cannot be omitted}
+  end
+
+  it "does not allow grandfathered langtags" do
+    lambda {
+      @langtag.language = 'zh'
+      @langtag.variants_sequence = 'hakka'
+    }.should raise_error Lang::Tag::Error, %r{Grandfathered Language-Tag: "zh-hakka"}
+  end
+
+end
+
+describe Lang::Tag, "#defer_validation" do
+
+  before :each do
+    @langtag = Lang::Tag.new
+    @invalid = lambda do
+      @langtag.variants_sequence = 'hepburn'
+      @langtag.script = 'Latn'
+    end
+  end
+
+  it "defers validation" do
+    @langtag.defer_validation do
+      lambda(&@invalid).should_not raise_error
+      @langtag.language = 'ja'
+    end
+  end
+
+  it "revalidates self after block execution" do
+    @langtag = Lang::Tag.new
+    lambda { @langtag.defer_validation &@invalid
+    }.should raise_error Lang::Tag::InvalidComponentError, %r{Primary subtag cannot be omitted}
+  end
+
+end
+
+describe Lang::Tag, "formatting", "with #nicecase" do
+
+  it "transforms 'dE' to 'de'" do
+    nicecased = Lang::Tag('de')
+    candidate = Lang::Tag('dE').nicecase
+    candidate.language.should == 'de'
+    candidate.primary.should == 'de'
+    candidate.extlang.should == nil
+    candidate.should == nicecased
+  end
+
+  it "transforms 'zH-hAk' to 'zh-hak'" do
+    nicecased = Lang::Tag('zh-hak')
+    candidate = Lang::Tag('zH-hAk').nicecase
+    candidate.language.should == 'zh-hak'
+    candidate.primary.should == 'zh'
+    candidate.extlang.should == 'hak'
+    candidate.should == nicecased
+  end
+
+  it "transforms 'de-De' to 'de-DE'" do
+    nicecased = Lang::Tag('de-DE')
+    candidate = Lang::Tag('de-De').nicecase
+    candidate.region.should == 'DE'
+    candidate.should == nicecased
+  end
+
+  it "transforms 'de-lAtN-DE' to 'de-Latn-DE'" do
+    nicecased = Lang::Tag('de-Latn-DE')
+    candidate = Lang::Tag('de-lAtN-de').nicecase
+    candidate.script.should == 'Latn'
+    candidate.should == nicecased
+  end
+
+  it "transforms 'sl-rOzAj-NeDiS' to 'sl-rozaj-nedis'" do
+    nicecased = Lang::Tag('sl-rozaj-nedis')
+    candidate = Lang::Tag('sl-rOzAj-NeDiS').nicecase
+    candidate.variants_sequence.should == 'rozaj-nedis'
+    candidate.should == nicecased
+  end
+
+  it "transforms 'de-U-aTtR-cO-pHoNeBk-A-eXtEnDeD' to 'de-u-attr-co-phonebk-a-extended'" do
+    nicecased = Lang::Tag('de-u-attr-co-phonebk-a-extended')
+    candidate = Lang::Tag('de-U-aTtR-cO-pHoNeBk-A-eXtEnDeD').nicecase
+    candidate.extensions_sequence.should == 'u-attr-co-phonebk-a-extended'
+    candidate.should == nicecased
+  end
+
+  it "transforms 'el-X-aTtIc' to 'el-x-attic'" do
+    nicecased = Lang::Tag('el-x-attic')
+    candidate = Lang::Tag('el-X-aTtIc').nicecase
+    candidate.privateuse_sequence.should == 'x-attic'
+    candidate.should == nicecased
   end
 
 end
