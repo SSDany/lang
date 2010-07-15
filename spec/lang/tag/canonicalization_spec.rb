@@ -136,10 +136,31 @@ end
 
 describe Lang::Tag, "#to_extlang_form" do
 
-  it "not yet implemented" do
+  it "canonicalizes the tag first" do
     langtag = Lang::Tag('yue')
-    lambda { langtag.to_extlang_form }.
-    should raise_error NotImplementedError
+    langtag.should_receive(:canonicalize!).and_return(langtag)
+    langtag.to_extlang_form!
+  end
+
+  it "transforms 'zh-yue' to 'zh-yue' (already in extlang form)" do
+    langtag = Lang::Tag('zh-yue')
+    candidate = langtag.to_extlang_form
+    candidate.should == Lang::Tag('zh-yue')
+    candidate.should be_same(langtag)
+  end
+
+  it "transforms 'yue' to 'zh-yue'" do
+    langtag = Lang::Tag('yue')
+    candidate = langtag.to_extlang_form
+    candidate.should == Lang::Tag('zh-yue')
+    candidate.should be_same(langtag)
+  end
+
+  it "transforms 'jsl' to 'sgn-jsl'" do
+    langtag = Lang::Tag('jsl')
+    candidate = langtag.to_extlang_form
+    candidate.should == Lang::Tag('sgn-jsl')
+    candidate.should be_same(langtag)
   end
 
 end

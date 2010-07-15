@@ -23,7 +23,8 @@ module Lang #:nodoc:
       #++
 
       def canonicalize_language
-        return unless @language
+        #return unless @language
+        raise InvalidComponentError, "Language can not be omitted." unless @language
         decompose_language unless @primary
 
 
@@ -203,7 +204,13 @@ module Lang #:nodoc:
       alias :canonize! :canonicalize!
 
       def to_extlang_form!
-        raise NotImplementedError
+        canonicalize!
+        subtag = Subtags::Extlang(@language)
+        @primary = subtag.prefix
+        @extlang = @language
+        @language = "#{@primary}#{HYPHEN}#{@extlang}"
+        dirty
+        nil
       end
 
       def to_extlang_form
