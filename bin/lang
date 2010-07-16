@@ -11,8 +11,8 @@ module Lang
   module Subtags
     class Registry
 
-      NAME_REGEX = /(?:#{SUBTAG}|#{TAG}):\s*([\w-]+)\s*/.freeze
-      TYPE_REGEX = /#{TYPE}:\s*(\w+)\s*/.freeze
+      NAME_REGEX = /^(?:#{SUBTAG}|#{TAG}):\s*([\w-]+)\s*$/io.freeze
+      TYPE_REGEX = /^#{TYPE}:\s*(\w+)\s*$/io.freeze
 
       def initialize(path = Lang::Subtags.registry_path)
         @path = path
@@ -24,24 +24,24 @@ module Lang
 
       def download(uri)
         FileUtils.mkdir_p(File.dirname(@path)) unless exists?
-        _write("registry") { |temp| _download(uri) { |chunk| temp << chunk }}
+        write("registry") { |temp| http(uri) { |chunk| temp << chunk }}
       end
 
       def build_indices
         return false unless exists?
 
         STDOUT << "Building indices\n"
-        _calculate_indices
-        _calculate_boundaries
+        calculate_indices
+        calculate_boundaries
 
-        _write("indices") do |temp|
+        write("indices") do |temp|
           @boundaries.each do |boundary|
-            template = "%-#{boundary[-3]}s%#{boundary[-2]}d\n"
-            @indices[boundary.first].to_a.sort.each { |k,v| temp << template % [k,v]; }
+            template = "%-#{boundary[-2]}s%#{boundary[-1] - boundary[-2] - 1}d\n"
+            @indices[boundary.first].to_a.sort.each { |k,v| temp << template % [k,v] }
           end
         end
 
-        _write("boundaries") do |temp|
+        write("boundaries") do |temp|
           @boundaries.each do |boundary|
             temp << "#{boundary.join(":")}\n"
           end
@@ -53,7 +53,7 @@ module Lang
 
       private
 
-      def _write(dest, &block)
+      def write(dest, &block)
         temp = Tempfile.new(dest)
         temp.binmode
         yield(temp) if block_given?
@@ -62,7 +62,7 @@ module Lang
         nil
       end
 
-      def _download(uri)
+      def http(uri)
         STDOUT << "Downloading #{uri}\n"
         Net::HTTP.get_response(uri) do |response|
           total, size = response['Content-Length'].to_i, 0
@@ -77,7 +77,7 @@ module Lang
         nil
       end
 
-      def _calculate_boundaries
+      def calculate_boundaries
         calculate_indices unless @indices
         offset = 0
         @boundaries = @indices.keys.sort{ |a,b| a.to_s <=> b.to_s }.map do |kind|
@@ -87,15 +87,14 @@ module Lang
           boundary << offset
           boundary << segment.size - 1
           boundary << segment.keys.map{ |s| s.size }.max
-          boundary << segment.values.max.to_s.size
-          boundary << boundary[-1] + boundary[-2] + 1
+          boundary << segment.values.max.to_s.size + boundary.last + 1
           offset   += segment.size * boundary.last
           boundary
         end
         true
       end
 
-      def _calculate_indices
+      def calculate_indices
         count = 0
         kind, name = nil, nil
         @indices = {}
@@ -107,7 +106,7 @@ module Lang
             elsif kind && NAME_REGEX === l
               name = $1.downcase
               @indices[kind][name] = count
-            elsif kind && name && l == SEPARATOR
+            elsif l == SEPARATOR
               kind, name = nil, nil
             end
             count += l.size
@@ -130,7 +129,10 @@ if __FILE__ == $0
   end
 
   registry = Lang::Subtags::Registry.new
-  registry.download(URI("http://www.iana.org/assignments/language-subtag-registry")) if command == 'update' || !registry.exists?
+
+  if command == 'update' || !registry.exists?
+    registry.download(URI("http://www.iana.org/assignments/language-subtag-registry"))
+  end
   registry.build_indices
 
 end

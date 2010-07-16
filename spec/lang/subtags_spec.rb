@@ -14,12 +14,12 @@ describe Lang::Subtags, ".Language" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @language = Lang::Subtags::Language('et')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @language = Lang::Subtags::Language('eT')
     end
 
@@ -49,12 +49,12 @@ describe Lang::Subtags, ".Extlang" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @extlang = Lang::Subtags::Extlang('hak')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @extlang = Lang::Subtags::Extlang('hAk')
     end
 
@@ -85,12 +85,12 @@ describe Lang::Subtags, ".Script" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @script = Lang::Subtags::Script('Hang')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @script = Lang::Subtags::Script('hAnG')
     end
 
@@ -118,12 +118,12 @@ describe Lang::Subtags, ".Region" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @region = Lang::Subtags::Region('DD')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @region = Lang::Subtags::Region('dD')
     end
 
@@ -153,12 +153,12 @@ describe Lang::Subtags, ".Variant" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @variant = Lang::Subtags::Variant('heploc')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @variant = Lang::Subtags::Variant('hEpLoC')
     end
 
@@ -189,12 +189,12 @@ describe Lang::Subtags, ".Grandfathered" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @grandfathered = Lang::Subtags::Grandfathered('i-navajo')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @grandfathered = Lang::Subtags::Grandfathered('i-nAvAjo')
     end
 
@@ -224,12 +224,12 @@ describe Lang::Subtags, ".Redundant" do
     end
 
     it "does not perform search twice" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @redundant = Lang::Subtags::Redundant('de-AT-1996')
     end
 
     it "works case-insensitively" do
-      Lang::Subtags.should_not_receive(:_load_entry)
+      Lang::Subtags.should_not_receive(:load_entry)
       @redundant = Lang::Subtags::Redundant('dE-aT-1996')
     end
 

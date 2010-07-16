@@ -50,26 +50,29 @@ module Lang #:nodoc:
            klass.entries.key?(snippet = snippet.downcase)
           return klass.entries[snippet]
         end
-        klass.entries[snippet] = _load_entry(kind, snippet)
+        klass.entries[snippet] = load_entry(kind, snippet)
       }
     end
 
     def close
       LOCK.synchronize {
-        _registry.close
-        _indices.close
+        registry.close
+        indices.close
       }
     end
 
-    def _search(kind, snippet)
-      lower, offset, upper, t, i, r = 0, *_boundaries[kind]
+    def search(kind, snippet)
+
+      lower = 0
+      offset, upper, t, r = *boundaries[kind]
       target = snippet.ljust(t)
+
       until upper < lower
         middle = (lower+upper)/2
-        _indices.seek(offset + middle*r, IO::SEEK_SET)
-        value = _indices.read(t)
+        indices.seek(offset + middle*r, IO::SEEK_SET)
+        value = indices.read(t)
         if value == target
-          return _indices.read(i).to_i
+          return indices.read(r-t).to_i
         elsif target < value
           upper = middle-1
         else
@@ -79,12 +82,12 @@ module Lang #:nodoc:
       nil
     end
 
-    def _load_entry(kind, snippet)
-      amount = _search(kind, snippet)
+    def load_entry(kind, snippet)
+      amount = search(kind, snippet)
       return nil unless amount
-      _registry.seek(amount, IO::SEEK_SET)
+      registry.seek(amount, IO::SEEK_SET)
       thing = SYM2CLASS[kind].new
-      until _registry.eof? || _registry.readline == SEPARATOR
+      until registry.eof? || registry.readline == SEPARATOR
 
         line = $_
         thing.comments << $' && next if CONTINUE_REGEX === line
@@ -112,30 +115,30 @@ module Lang #:nodoc:
       @registry_path ||= File.join(File.dirname(__FILE__), "data", "language-subtags")
     end
 
-    def _registry
-      @_registry ||= File.open("#{registry_path}.registry", File::RDONLY)
+    def registry
+      @registry ||= File.open("#{registry_path}.registry", File::RDONLY)
     end
 
-    def _indices
-      @_indices ||= File.open("#{registry_path}.indices", File::RDONLY)
+    def indices
+      @indices ||= File.open("#{registry_path}.indices", File::RDONLY)
     end
 
-    def _boundaries
-      return @_boundaries if @_boundaries
-      @_boundaries = {}
+    def boundaries
+      return @boundaries if @boundaries
+      @boundaries = {}
       File.open("#{registry_path}.boundaries", File::RDONLY).each_line do |line|
         boundary = line.split(COLON_SPLITTER)
-        @_boundaries[boundary.shift.to_sym] = boundary.map { |b| b.to_i }
+        @boundaries[boundary.shift.to_sym] = boundary.map { |b| b.to_i }
       end
-      @_boundaries
+      @boundaries
     end
 
     extend self
 
     class << self
-      private :_boundaries, :_indices, :_registry
-      private :_load_entry
-      private :_search
+      private :boundaries, :indices, :registry
+      private :load_entry
+      private :search
     end
 
   end
