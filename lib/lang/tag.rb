@@ -73,7 +73,7 @@ module Lang
     REGION_REGEX                          = /^(?:#{PATTERN::REGION})$/io.freeze
     VARIANTS_SEQUENCE_REGEX               = /^(?:#{PATTERN::VARIANT_SEQUENCE}+)$/io.freeze
     EXTENSIONS_SEQUENCE_REGEX             = /^#{PATTERN::EXTENSION_SEQUENCE}+$/io.freeze
-    EXTENSIONS_SEQUENCE_SPLITTER          = /(?:^|-)(#{PATTERN::SINGLETON})-/io.freeze
+    EXTENSIONS_SEQUENCE_SPLITTER          = /(?:^|-)(?=#{PATTERN::SINGLETON}-)/io.freeze
     PRIVATEUSE_REGEX                      = /^#{PATTERN::PRIVATEUSE}$/io.freeze
 
     LANGTAG_REGEX = /^
@@ -284,17 +284,16 @@ module Lang
       validate
     end
 
-    # Variants of the lantag, each *downcased*
-    # for case-insensitive comparison purposes.
+    # Returns a list of variants of this lantag.
     #
     attr_reader :variants
 
     def decompose_variants
       if @variants_sequence
-        @variants = @variants_sequence.downcase.split(HYPHEN_SPLITTER)
-        if @variants.uniq!
+        if @variants_sequence.downcase.split(HYPHEN_SPLITTER).uniq!
           raise InvalidComponentError, "#{@variants_sequence.inspect} sequence includes repeated variants."
         end
+        @variants = @variants_sequence.split(HYPHEN_SPLITTER)
       else
         @variants = nil
       end
@@ -303,12 +302,12 @@ module Lang
 
     protected :decompose_variants
 
-    # Checks if self has a variant passed.
-    # Works case-insensitively.
+    # Checks if self has a variant or a sequence of
+    # variants passed. Works case-insensitively.
     #
-    def has_variant?(variant)
-      return false unless @variants
-      @variants.include?(variant) || @variants.include?(variant.downcase)
+    def has_variant?(sequence)
+      return false unless @variants_sequence
+      /(?:^|-)#{sequence}(?:-|$)/i === @variants_sequence
     end
 
     #--
@@ -333,10 +332,14 @@ module Lang
 
     def decompose_extensions
       if @extensions_sequence
-        subtags = @extensions_sequence.downcase.split(EXTENSIONS_SEQUENCE_SPLITTER)[1..-1]
-        @extensions = Hash[*subtags]
-        if @extensions.size * 2 != subtags.size
-          raise InvalidComponentError, "#{@extensions_sequence.inspect} sequence includes repeated singletons."
+        @extensions = {}
+        @extensions_sequence.split(EXTENSIONS_SEQUENCE_SPLITTER).each do |sequence|
+          k,v = sequence[0...1], sequence[2..-1] # sequence.split(HYPHEN_SPLITTER,2)
+          k.downcase!
+          if @extensions.key?(k)
+            raise InvalidComponentError, "#{@extensions_sequence.inspect} sequence includes repeated singletons."
+          end
+          @extensions[k] = v
         end
       else
         @extensions = nil
@@ -355,8 +358,8 @@ module Lang
       keys
     end
 
-    # Returns a sequense of subtags for a singleton passed,
-    # each *downcased* for case-insensitive comparison purposes.
+    # Returns a sequense of subtags for a singleton passed.
+    # Works case-insensitively.
     #
     def extension(key)
       return nil unless @extensions
@@ -394,7 +397,7 @@ module Lang
 
     def privateuse
       return nil unless @privateuse_sequence
-      @privateuse ||= @privateuse_sequence.downcase.split(HYPHEN)[1..-1]
+      @privateuse ||= @privateuse_sequence.split(HYPHEN)[1..-1]
     end
 
     # Sets the 'privateuse' sequence for this langtag.

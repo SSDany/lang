@@ -204,12 +204,10 @@ module Lang #:nodoc:
       # in alphabetical order).
       #++
 
-      EXTENSION_SEQUENCE_C_SPLITTER = /(?:^|-)(?=#{PATTERN::SINGLETON}-)/io.freeze
-
       def canonicalize_extensions
         return unless @extensions_sequence
         @extensions_sequence = @extensions_sequence.
-          split(EXTENSION_SEQUENCE_C_SPLITTER).
+          split(EXTENSIONS_SEQUENCE_SPLITTER).
           sort{ |k,v| k.downcase <=> v.downcase }.
           join(HYPHEN)
         dirty

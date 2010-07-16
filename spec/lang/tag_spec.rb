@@ -380,7 +380,7 @@ describe Lang::Tag, "'sl-rozaj-biske-1994'" do
     it "exposes new variants as an Array" do
       @langtag.variants.should be_an_instance_of ::Array
       @langtag.variants.size.should == 2
-      @langtag.variants.should == ['rozaj', 'nedis']
+      @langtag.variants.should == ['Rozaj', 'nEDIS']
     end
 
     it "exposes a new sequence of variants in a composition" do
@@ -567,8 +567,8 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
     it "exposes an 's' extension as an Array" do
       @langtag.extension('s').should be_an_instance_of ::Array
       @langtag.extension('s').size.should == 1
-      @langtag.extension('s').should == ['mfa'] # Ministry of Foreign Affairs standard
-      @langtag.extension('S').should == ['mfa']
+      @langtag.extension('s').should == ['MFA'] # Ministry of Foreign Affairs standard
+      @langtag.extension('S').should == ['MFA']
     end
 
     it "has no 'p' singleton" do
@@ -667,7 +667,7 @@ describe Lang::Tag, "'el-x-koine'" do
     it "exposes new privateuse components as an Array" do
       @langtag.privateuse.should be_an_instance_of ::Array
       @langtag.privateuse.size.should == 1
-      @langtag.privateuse.should == ['attic']
+      @langtag.privateuse.should == ['Attic']
     end
 
     it "exposes new privateuse components in a composition" do
