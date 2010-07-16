@@ -14,8 +14,28 @@ describe Lang::Tag, "#canonicalize" do
     canonical.should be_same(langtag)
   end
 
+  it "canonicalizes 'jsl' to 'jsl' (already in canonical form)" do
+    langtag = Lang::Tag('jsl')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('jsl')
+    canonical.should be_same(langtag)
+  end
+
+  it "raises a Canonicalization::Error when attempts to canonicalize 'xx'" do
+    langtag = Lang::Tag('xx')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error, %r{Language "xx" is not registered}
+  end
+
   it "canonicalizes 'zh-yue' to 'yue'" do
     langtag = Lang::Tag('zh-yue')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('yue')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'ZH-YUE' to 'yue' (case-insensitivity)" do
+    langtag = Lang::Tag('ZH-YUE')
     canonical = langtag.canonicalize
     canonical.should == Lang::Tag('yue')
     canonical.should be_same(langtag)
@@ -40,13 +60,10 @@ describe Lang::Tag, "#canonicalize" do
     should raise_error Lang::Tag::Canonicalization::Error, %r{Extlang "xxx" is not registered}
   end
 
-  it "replaces primary language subtag when canonicalizes 'xx-yue'" do
+  it "raises a Canonicalization::Error when attempts to canonicalize 'xx-yue' (bad prefix)" do
     langtag = Lang::Tag('xx-yue')
-    canonical = langtag.canonicalize
-    canonical.should == Lang::Tag('yue')
-    canonical.should be_same(langtag)
-    canonical.primary.should == 'yue'
-    canonical.extlang.should == nil
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error, %r{Extlang "yue" requires prefix "zh"}
   end
 
   it "canonicalizes 'zh-cmn-Hant' to 'cmn-Hant'" do
@@ -63,10 +80,30 @@ describe Lang::Tag, "#canonicalize" do
     canonical.should be_same(langtag)
   end
 
-  it "canonicalizes 'de-Qaax' to 'de-Qaax' (privateuse script)" do
+  it "canonicalizes 'de-Qaax' to 'de-Qaax' (already in canonical form; privateuse script)" do
     langtag = Lang::Tag('de-Qaax')
     canonical = langtag.canonicalize
     canonical.should == Lang::Tag('de-Qaax')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'ru-Cyrl' to 'ru-Cyrl' (already in canonical form)" do
+    langtag = Lang::Tag('ru-Cyrl')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('ru-Cyrl')
+    canonical.should be_same(langtag)
+  end
+
+  it "raises a Canonicalization::Error when attempts to canonicalize 'ru-Xxxx'" do
+    langtag = Lang::Tag('de-Xxxx')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error, %r{Script "Xxxx" is not registered}
+  end
+
+  it "canonicalizes 'de-DE' to 'de-DE' (already in canonical form)" do
+    langtag = Lang::Tag('de-DE')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('de-DE')
     canonical.should be_same(langtag)
   end
 
@@ -97,10 +134,93 @@ describe Lang::Tag, "#canonicalize" do
     canonical.should be_same(langtag)
   end
 
-  it "raises a Canonicalization::Error when attempts to canonicalize 'ja-Xxxx' (script is not registered)" do
-    langtag = Lang::Tag('ja-Xxxx')
-    lambda { langtag.canonicalize! }.
-    should raise_error Lang::Tag::Canonicalization::Error, %r{Script "Xxxx" is not registered}
+  it "canonicalizes 'sl-rozaj' to 'sl-rozaj' (already in canonical form)" do
+    langtag = Lang::Tag('sl-rozaj')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-rozaj')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'SL-Rozaj' to 'SL-Rozaj (case-insensitivity, undestructivity)" do
+    langtag = Lang::Tag('SL-Rozaj')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('SL-Rozaj')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'sl-rozaj-1994' to 'sl-rozaj-1994' (already in canonical form)" do
+    langtag = Lang::Tag('sl-rozaj-1994')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-rozaj-1994')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'sl-rozaj-biske-1994' to 'sl-rozaj-biske-1994' (already in canonical form)" do
+    langtag = Lang::Tag('sl-rozaj-biske-1994')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-rozaj-biske-1994')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'sl-Latn-IT-rozaj-biske-1994' to 'sl-Latn-IT-rozaj-biske-1994' (already in canonical form)" do
+    langtag = Lang::Tag('sl-Latn-IT-rozaj-biske-1994')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-Latn-IT-rozaj-biske-1994')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'sl-rozaj-njiva-1994' to 'sl-rozaj-njiva-1994' (already in canonical form)" do
+    langtag = Lang::Tag('sl-rozaj-njiva-1994')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-rozaj-njiva-1994')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'sl-rozaj-osojs-1994' to 'sl-rozaj-osojs-1994' (already in canonical form)" do
+    langtag = Lang::Tag('sl-rozaj-osojs-1994')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-rozaj-osojs-1994')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'sl-rozaj-solba-1994' to 'sl-rozaj-solba-1994' (already in canonical form)" do
+    langtag = Lang::Tag('sl-rozaj-solba-1994')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('sl-rozaj-solba-1994')
+    canonical.should be_same(langtag)
+  end
+
+  it "raises a Canonicalization::Error when attempts to canonicalize 'sl-xxxxx'" do
+    langtag = Lang::Tag('sl-xxxxx')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error,
+      %r{Variant "xxxxx" is not registered}
+  end
+
+  it "raises a Canonicalization::Error when attempts to canonicalize 'sl-1994-rozaj-biske'" do
+    langtag = Lang::Tag('sl-1994-rozaj-biske')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error,
+      %r{Variant "1994" requires one of following prefixes: "sl-rozaj", "sl-rozaj-biske", "sl-rozaj-njiva", "sl-rozaj-osojs", "sl-rozaj-solba"}
+  end
+
+  it "raises a Canonicalization::Error when attempts to canonicalize 'sl-rozaj-1994-biske' (bad prefix)" do
+    langtag = Lang::Tag('sl-rozaj-1994-biske')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error,
+      %r{Variant "biske" requires one of following prefixes: "sl-rozaj"}
+  end
+
+  it "canonicalizes 'ja-lAtN-hEpBuRn-hEpLoC' (case-insensitivity)" do
+    langtag = Lang::Tag('ja-lAtN-hEpBuRn-hEpLoC')
+    lambda { langtag.canonicalize }.
+    should_not raise_error
+  end
+
+  it "raises a Canonicalization::Error when attempts to canonicalize 'ja-Latn-heploc-alalc97'" do
+    langtag = Lang::Tag('ja-Latn-heploc-alalc97')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error, %r{Variant "heploc" requires one of following prefixes: "ja-Latn-hepburn"}
   end
 
   it "canonicalizes 'ja-Latn-hepburn-heploc' to 'ja-Latn-hepburn-alalc97' (obsolete variant)" do
@@ -163,6 +283,13 @@ describe Lang::Tag, "#to_extlang_form" do
     candidate.should be_same(langtag)
   end
 
+  it "transforms 'hak-CN' to 'zh-hak-CN'" do
+    langtag = Lang::Tag('hak-CN')
+    candidate = langtag.to_extlang_form
+    candidate.should == Lang::Tag('zh-hak-CN')
+    candidate.should be_same(langtag)
+  end
+
 end
 
 describe Lang::Tag, "#suppress_script" do
@@ -206,169 +333,6 @@ describe Lang::Tag, "#suppress_script" do
     candidate = langtag.suppress_script
     candidate.should == Lang::Tag('de-Qaax')
     candidate.script.should == 'Qaax'
-  end
-
-end
-
-describe Lang::Tag, "#validate_language" do
-
-  it "successfully validates language in the tag 'jsl'" do
-    langtag = Lang::Tag('jsl')
-    lambda { langtag.validate_language }.
-    should_not raise_error
-  end
-
-  it "successfully validates language in the tag 'zh-yue'" do
-    langtag = Lang::Tag('zh-yue')
-    lambda { langtag.validate_language }.
-    should_not raise_error
-  end
-
-  it "successfully validates language in the tag 'zh-YUE' (case-insensitivity)" do
-    langtag = Lang::Tag('zh-YUE')
-    lambda { langtag.validate_language }.
-    should_not raise_error
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate language in the tag 'xx'" do
-    langtag = Lang::Tag('xx')
-    lambda { langtag.validate_language }.
-    should raise_error Lang::Tag::Canonicalization::Error, %r{Language "xx" is not registered}
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate language in the tag 'xx-yue'" do
-    langtag = Lang::Tag('xx-yue')
-    lambda { langtag.validate_language }.
-    should raise_error Lang::Tag::Canonicalization::Error, %r{Extlang "yue" requires prefix "zh"}
-  end
-
-end
-
-describe Lang::Tag, "#validate_script" do
-
-  it "successfully validates script in the tag 'ru-Cyrl'" do
-    langtag = Lang::Tag('ru-Cyrl')
-    lambda { langtag.validate_script }.
-    should_not raise_error
-  end
-
-  it "successfully validates region in the tag 'ru-Qaai' (privateuse script)" do
-    langtag = Lang::Tag('de-Qaai')
-    lambda { langtag.validate_script }.
-    should_not raise_error
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate script in the tag 'ru-Xxxx'" do
-    langtag = Lang::Tag('de-Xxxx')
-    lambda { langtag.validate_script }.
-    should raise_error Lang::Tag::Canonicalization::Error, %r{Script "Xxxx" is not registered}
-  end
-
-end
-
-describe Lang::Tag, "#validate_region" do
-
-  it "successfully validates region in the tag 'de-DE'" do
-    langtag = Lang::Tag('de-DE')
-    lambda { langtag.validate_region }.
-    should_not raise_error
-  end
-
-  it "successfully validates region in the tag 'de-QA' (privateuse region)" do
-    langtag = Lang::Tag('de-QA')
-    lambda { langtag.validate_region }.
-    should_not raise_error
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate region in the tag 'de-000'" do
-    langtag = Lang::Tag('de-000')
-    lambda { langtag.validate_region }.
-    should raise_error Lang::Tag::Canonicalization::Error, %r{Region "000" is not registered}
-  end
-
-end
-
-describe Lang::Tag, "#validate_variants" do
-
-  it "successfully validates variants in the tag 'sl-rozaj'" do
-    langtag = Lang::Tag('sl-rozaj')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'SL-rozaj' (case-insensitivity)" do
-    langtag = Lang::Tag('SL-rozaj')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'sl-rozaj-1994'" do
-    langtag = Lang::Tag('sl-rozaj-1994')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'sl-rozaj-biske-1994'" do
-    langtag = Lang::Tag('sl-rozaj-biske-1994')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'sl-Latn-IT-rozaj-biske-1994'" do
-    langtag = Lang::Tag('sl-Latn-IT-rozaj-biske-1994')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'sl-rozaj-njiva-1994'" do
-    langtag = Lang::Tag('sl-rozaj-njiva-1994')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'sl-rozaj-osojs-1994'" do
-    langtag = Lang::Tag('sl-rozaj-osojs-1994')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "successfully validates variants in the tag 'sl-rozaj-solba-1994'" do
-    langtag = Lang::Tag('sl-rozaj-solba-1994')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate variants in the tag 'sl-xxxxx'" do
-    langtag = Lang::Tag('sl-xxxxx')
-    lambda { langtag.validate_variants }.
-    should raise_error Lang::Tag::Canonicalization::Error,
-      %r{Variant "xxxxx" is not registered}
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate variants in the tag 'sl-1994-rozaj-biske'" do
-    langtag = Lang::Tag('sl-1994-rozaj-biske')
-    lambda { langtag.validate_variants }.
-    should raise_error Lang::Tag::Canonicalization::Error,
-      %r{Variant "1994" requires one of following prefixes: "sl-rozaj", "sl-rozaj-biske", "sl-rozaj-njiva", "sl-rozaj-osojs", "sl-rozaj-solba"}
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate variants in the tag 'sl-rozaj-1994-biske' (bad prefix)" do
-    langtag = Lang::Tag('sl-rozaj-1994-biske')
-    lambda { langtag.validate_variants }.
-    should raise_error Lang::Tag::Canonicalization::Error,
-      %r{Variant "biske" requires one of following prefixes: "sl-rozaj"}
-  end
-
-  it "successfully validates variants in the tag 'ja-lAtN-hEpBuRn-hEpLoC' (case-insensitivity)" do
-    langtag = Lang::Tag('ja-lAtN-hEpBuRn-hEpLoC')
-    lambda { langtag.validate_variants }.
-    should_not raise_error
-  end
-
-  it "raises a Canonicalization::Error when attempts to validate variants in the tag 'ja-Latn-heploc-alalc97'" do
-    langtag = Lang::Tag('ja-Latn-heploc-alalc97')
-    lambda { langtag.validate_variants }.
-    should raise_error Lang::Tag::Canonicalization::Error, %r{Variant "heploc" requires one of following prefixes: "ja-Latn-hepburn"}
   end
 
 end

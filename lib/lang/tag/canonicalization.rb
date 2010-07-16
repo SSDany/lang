@@ -13,6 +13,17 @@ module Lang #:nodoc:
       end
 
       #--
+      # RFC 5646, Section 2.2.1
+      # The subtags in the range 'qaa' through 'qtz' are reserved for
+      # private use in language tags. These subtags correspond to codes
+      # reserved by ISO 639-2 for private use. These codes MAY be used
+      # for non-registered primary language subtags (instead of using
+      # private use subtags following 'x-').
+      #++
+
+      PRIVATE_LANGUAGE_REGEX = /^q[a-t][a-z]$/i.freeze
+
+      #--
       # RFC 5646, Section 3.1.7
       # Extended language subtags always have a mapping to their
       # identical primary language subtag.  For example, the extended
@@ -22,8 +33,11 @@ module Lang #:nodoc:
       # "zh-yue-Hant-HK" can be canonicalized to "yue-Hant-HK".
       #++
 
+      # Canonicalizes language component, applying rules that described
+      # in RFC5646, sections 2.2.1, 2.2.2 and 4.5. Also validates the
+      # language sequence using the 'Prefix' field-value of the extlang.
+      #
       def canonicalize_language
-        #return unless @language
         raise InvalidComponentError, "Language can not be omitted." unless @language
         decompose_language unless @primary
 
@@ -45,17 +59,30 @@ module Lang #:nodoc:
           # deprecated in favor of either a single primary language subtag or a
           # new language-extlang sequence.
 
+          unless subtag.prefix == @primary ||
+                 subtag.prefix == @primary.downcase # as of now, we have exactly one extlang
+
+            # RFC 5646, Section 3.4
+            # Extended language subtag records MUST include exactly one
+            # 'Prefix' field indicating an appropriate subtag or sequence of
+            # subtags for that extended language subtag.
+
+            raise Error, "Extlang #{@extlang.inspect} requires prefix #{subtag.prefix.inspect}."
+          end
+
           @language = subtag.preferred_value
           @primary = nil
           @extlang = nil
-        else
+          dirty
+
+        elsif PRIVATE_LANGUAGE_REGEX !~ @primary
           subtag = Subtags::Language(@primary)
           raise Error, "Language #{@primary.inspect} is not registered." unless subtag
           @language = subtag.preferred_value if subtag.preferred_value
           @primary = nil
+          dirty
         end
 
-        dirty
         nil
       end
 
@@ -112,12 +139,55 @@ module Lang #:nodoc:
 
       protected :canonicalize_region
 
+      #--
+      # RFC 5646, Section 3.1.8
+      # The 'Prefix' also indicates when variant subtags make sense when used
+      # together (many that otherwise share a 'Prefix' are mutually
+      # exclusive) and what the relative ordering of variants is supposed to
+      # be. For example, the variant '1994' (Standardized Resian
+      # orthography) has several 'Prefix' fields in the registry ("sl-rozaj",
+      # "sl-rozaj-biske", "sl-rozaj-njiva", "sl-rozaj-osojs", and "sl-rozaj-
+      # solba").  This indicates not only that '1994' is appropriate to use
+      # with each of these five Resian variant subtags ('rozaj', 'biske',
+      # 'njiva', 'osojs', and 'solba'), but also that it SHOULD appear
+      # following any of these variants in a tag. Thus, the language tag
+      # ought to take the form "sl-rozaj-biske-1994", rather than "sl-1994-
+      # rozaj-biske" or "sl-rozaj-1994-biske".
+      #++
+
+      PREFIX_REGEX = /^(#{PATTERN::LANGUAGE})(?:-(#{PATTERN::SCRIPT}))?(?:-(#{PATTERN::REGION}))?(?:-(.+))?$/io.freeze
+
+      # Canonicalizes variants, applying rules that described in RFC 5646,
+      # sections 2.2.5 and 4.5. Also validates the sequence of variants
+      # using 'Prefix' field-values (see RFC 5646, section 3.1.8).
+      #
       def canonicalize_variants
         return unless @variants_sequence
+        sequence = nil
         @variants.map! do |variant|
+
           v = Subtags::Variant(variant)
           raise Error, "Variant #{variant.inspect} is not registered." unless v
-          v.preferred_value || variant
+
+          if !v.prefixes || v.prefixes.any? { |prefix|
+            PREFIX_REGEX === prefix
+            ($4 == nil || $4 == sequence) &&
+            ($3 == nil || @region && ($3 == @region || $3 == @region.upcase)) &&
+            ($2 == nil || @script && ($2 == @script || $2 == @script.capitalize)) &&
+            ($1 == @language || $1 == @language.downcase)
+            }
+
+            sequence ? sequence << HYPHEN : sequence = ""
+            sequence << v.name
+
+            v.preferred_value || variant
+
+          else raise Error,
+            "Variant #{variant.inspect} requires " \
+            "one of following prefixes: " \
+            "#{v.prefixes.map{ |p| p.inspect }.join(", ")}."
+          end
+
         end
         @variants_sequence = @variants.join(HYPHEN)
         dirty
@@ -182,7 +252,6 @@ module Lang #:nodoc:
         # 2. Redundant or grandfathered tags are replaced by their 'Preferred-
         # Value', if there is one.
 
-        # TODO: "sgn-Qaaa-JP" => ("sgn-JP" = "jsl") => "jsl-Qaaa" ?
         if re = Subtags::Redundant(composition)
           return recompose(re.preferred_value) if re.preferred_value
         end
@@ -200,8 +269,16 @@ module Lang #:nodoc:
         nil
       end
 
-      alias :canonize  :canonicalize
-      alias :canonize! :canonicalize!
+      alias :to_canonical_form! :canonicalize!
+      alias :to_canonical_form  :canonicalize
+
+      #--
+      # RFC 5646, Section 4.5
+      # For example, "hak-CN" (Hakka, China) has the primary language
+      # subtag 'hak', which in turn has an 'extlang' record with a
+      # 'Prefix' 'zh' (Chinese).  The extlang form is "zh-hak-CN"
+      # (Chinese, Hakka, China).
+      #++
 
       def to_extlang_form!
         canonicalize!
@@ -217,98 +294,6 @@ module Lang #:nodoc:
         duplicated = self.dup
         duplicated.to_extlang_form!
         duplicated
-      end
-
-      def validate_language
-        return unless @language
-        decompose_language unless @primary
-        if @extlang
-          subtag = Subtags::Extlang(@extlang)
-
-          # RFC 5646, Section 3.4
-          # Extended language subtag records MUST include exactly one
-          # 'Prefix' field indicating an appropriate subtag or sequence of
-          # subtags for that extended language subtag.
-
-          unless subtag.prefix == @primary || subtag.prefix == @primary.downcase
-            raise Error, "Extlang #{@extlang.inspect} requires prefix #{subtag.prefix.inspect}."
-          end
-
-        elsif !Subtags::Language(@primary)
-          raise Error, "Language #{@primary.inspect} is not registered."
-        end
-        nil
-      end
-
-      def validate_script
-        return if !@script || PRIVATE_SCRIPT_REGEX === @script
-        raise Error, "Script #{@script.inspect} is not registered" unless Subtags::Script(@script)
-        nil
-      end
-
-      def validate_region
-        return if !@region || PRIVATE_REGION_REGEX === @region
-        raise Error, "Region #{@region.inspect} is not registered" unless Subtags::Region(@region)
-        nil
-      end
-
-      #--
-      # RFC 5646, Section 3.1.8
-      # The 'Prefix' also indicates when variant subtags make sense when used
-      # together (many that otherwise share a 'Prefix' are mutually
-      # exclusive) and what the relative ordering of variants is supposed to
-      # be. For example, the variant '1994' (Standardized Resian
-      # orthography) has several 'Prefix' fields in the registry ("sl-rozaj",
-      # "sl-rozaj-biske", "sl-rozaj-njiva", "sl-rozaj-osojs", and "sl-rozaj-
-      # solba").  This indicates not only that '1994' is appropriate to use
-      # with each of these five Resian variant subtags ('rozaj', 'biske',
-      # 'njiva', 'osojs', and 'solba'), but also that it SHOULD appear
-      # following any of these variants in a tag. Thus, the language tag
-      # ought to take the form "sl-rozaj-biske-1994", rather than "sl-1994-
-      # rozaj-biske" or "sl-rozaj-1994-biske".
-      #++
-
-      PREFIX_REGEX = /^(#{PATTERN::LANGUAGE})(?:-(#{PATTERN::SCRIPT}))?(?:-(#{PATTERN::REGION}))?(?:-(.+))?$/io.freeze
-
-      # Validates the sequence of variants according 'Prefix' rules
-      # as described in RFC 5646, section 3.1.8.
-      #
-      def validate_variants
-        return unless @variants_sequence
-
-        sequence = nil
-        @variants.each do |variant|
-          v = Subtags::Variant(variant)
-          raise Error, "Variant #{variant.inspect} is not registered." unless v
-
-          # RFC 5646, Section 3.1.4
-          # The 'Subtag' field-body MUST follow the casing conventions described
-          # in Section 2.1.1. All subtags use lowercase letters in the field-
-          # body, with two exceptions:
-          # - Subtags whose 'Type' field is 'script' (in other words, subtags
-          #   defined by ISO 15924) MUST use titlecase.
-          # - Subtags whose 'Type' field is 'region' (in other words, the non-
-          #   numeric region subtags defined by ISO 3166-1) MUST use all
-          #   uppercase.
-
-          if !v.prefixes || v.prefixes.any? { |prefix|
-              PREFIX_REGEX === prefix # quick parse
-              ($4 == nil || $4 == sequence) && # required sequence of variants
-              ($3 == nil || @region && ($3 == @region || $3 == @region.upcase)) && # required region
-              ($2 == nil || @script && ($2 == @script || $2 == @script.capitalize)) && # required script
-              ($1 == @language || $1 == @language.downcase) # required language
-            }
-
-            sequence ? sequence << HYPHEN : sequence = ""
-            sequence << v.name
-
-          else raise Error,
-            "Variant #{variant.inspect} requires " \
-            "one of following prefixes: " \
-            "#{v.prefixes.map{ |p| p.inspect }.join(", ")}."
-          end
-        end
-        nil
       end
 
       #--
