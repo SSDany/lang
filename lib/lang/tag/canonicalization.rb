@@ -28,7 +28,7 @@ module Lang #:nodoc:
       # Extended language subtags always have a mapping to their
       # identical primary language subtag.  For example, the extended
       # language subtag 'yue' (Cantonese) can be used to form the tag
-      # "zh-yue".  It has a 'Preferred-Value' mapping to the primary
+      # "zh-yue". It has a 'Preferred-Value' mapping to the primary
       # language subtag 'yue', meaning that a tag such as
       # "zh-yue-Hant-HK" can be canonicalized to "yue-Hant-HK".
       #++
@@ -78,9 +78,11 @@ module Lang #:nodoc:
         elsif PRIVATE_LANGUAGE_REGEX !~ @primary
           subtag = Subtags::Language(@primary)
           raise Error, "Language #{@primary.inspect} is not registered." unless subtag
-          @language = subtag.preferred_value if subtag.preferred_value
-          @primary = nil
-          dirty
+          if subtag.preferred_value
+            @language = subtag.preferred_value
+            @primary = nil
+            dirty
+          end
         end
 
         nil
@@ -103,8 +105,11 @@ module Lang #:nodoc:
         return if !@script || PRIVATE_SCRIPT_REGEX === @script
         subtag = Subtags::Script(@script)
         raise Error, "Script #{@script.inspect} is not registered." unless subtag
-        @script = subtag.preferred_value if subtag.preferred_value
-        dirty
+        if subtag.preferred_value
+          @script = subtag.preferred_value
+          dirty
+        end
+        nil
       end
 
       protected :canonicalize_script
@@ -133,8 +138,11 @@ module Lang #:nodoc:
         return if !@region || PRIVATE_REGION_REGEX === @region
         subtag = Subtags::Region(@region)
         raise Error, "Region #{@region.inspect} is not registered." unless subtag
-        @region = subtag.preferred_value if subtag.preferred_value #|| subtag.name
-        dirty
+        if subtag.preferred_value
+          @region = subtag.preferred_value
+          dirty
+        end
+        nil
       end
 
       protected :canonicalize_region
@@ -163,6 +171,7 @@ module Lang #:nodoc:
       #
       def canonicalize_variants
         return unless @variants_sequence
+
         sequence = nil
         @variants.map! do |variant|
 
@@ -180,7 +189,12 @@ module Lang #:nodoc:
             sequence ? sequence << HYPHEN : sequence = ""
             sequence << v.name
 
-            v.preferred_value || variant
+            if v.preferred_value
+              @variants_sequence = nil
+              v.preferred_value
+            else
+              variant
+            end
 
           else raise Error,
             "Variant #{variant.inspect} requires " \
@@ -189,8 +203,13 @@ module Lang #:nodoc:
           end
 
         end
-        @variants_sequence = @variants.join(HYPHEN)
-        dirty
+
+        unless @variants_sequence
+          @variants_sequence = @variants.join(HYPHEN)
+          dirty
+        end
+
+        nil
       end
 
       protected :canonicalize_variants
@@ -206,11 +225,15 @@ module Lang #:nodoc:
 
       def canonicalize_extensions
         return unless @extensions_sequence
-        @extensions_sequence = @extensions_sequence.
+        ordered = @extensions_sequence.
           split(EXTENSIONS_SEQUENCE_SPLITTER).
-          sort{ |k,v| k.downcase <=> v.downcase }.
-          join(HYPHEN)
-        dirty
+          sort!{ |k,v| k.downcase <=> v.downcase }.join(HYPHEN)
+
+        unless @extensions_sequence == ordered
+          @extensions_sequence = ordered
+          dirty
+        end
+        nil
       end
 
       protected :canonicalize_extensions
@@ -317,16 +340,20 @@ module Lang #:nodoc:
         return unless @script && @language
         decompose_language unless @primary
 
+        return if PRIVATE_LANGUAGE_REGEX === @primary
+
         subtag = Subtags::Language(@primary)
         raise Error, "Language #{@primary.inspect} is not registered." unless subtag
         if subtag.suppress_script && @script == subtag.suppress_script
           @script = nil
+          dirty
         #elsif @extlang
         #  subtag = Subtags::Extlang(@extlang)
         #  raise Error, "Extlang #{@extlang.inspect} is not registered." unless subtag
-        #  @script = nil if subtag.suppress_script && @script == subtag.suppress_script
+        #  if subtag.suppress_script && @script == subtag.suppress_script
+        #    dirty
+        #  end
         end
-        dirty
         nil
       end
 

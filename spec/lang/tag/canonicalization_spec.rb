@@ -21,6 +21,20 @@ describe Lang::Tag, "#canonicalize" do
     canonical.should be_same(langtag)
   end
 
+  it "canonicalizes 'qaa' to 'qaa' (private language; already in canonical form)" do
+    langtag = Lang::Tag('qaa')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('qaa')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'in' to 'id' (Indonesian)" do
+    langtag = Lang::Tag('in')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('id')
+    canonical.should be_same(langtag)
+  end
+
   it "raises a Canonicalization::Error when attempts to canonicalize 'xx'" do
     langtag = Lang::Tag('xx')
     lambda { langtag.canonicalize }.
@@ -251,6 +265,39 @@ describe Lang::Tag, "#canonicalize" do
     canonical.should be_same(langtag)
   end
 
+end
+
+describe Lang::Tag, "#canonicalize!" do
+
+  it "does not call #dirty when attempts to canonicalize 'de' (no changes)" do
+    langtag = Lang::Tag('de')
+    langtag.should_not_receive(:dirty)
+    langtag.canonicalize!
+  end
+
+  it "does not call #dirty when attempts to canonicalize 'de-Latn' (no changes)" do
+    langtag = Lang::Tag('de-Latn')
+    langtag.should_not_receive(:dirty)
+    langtag.canonicalize!
+  end
+
+  it "does not call #dirty when attempts to canonicalize 'de-DE' (no changes)" do
+    langtag = Lang::Tag('de-DE')
+    langtag.should_not_receive(:dirty)
+    langtag.canonicalize!
+  end
+
+  it "does not call #dirty when attempts to canonicalize 'sl-rozaj-biske-1994' (no changes)" do
+    langtag = Lang::Tag('sl-rozaj-biske-1994')
+    langtag.should_not_receive(:dirty)
+    langtag.canonicalize!
+  end
+
+  it "does not call #dirty when attempts to canonicalize 'en-u-attr-co-phonebk' (no changes)" do
+    langtag = Lang::Tag('en-u-attr-co-phonebk')
+    langtag.should_not_receive(:dirty)
+    langtag.canonicalize!
+  end
 
 end
 
@@ -333,6 +380,23 @@ describe Lang::Tag, "#suppress_script" do
     candidate = langtag.suppress_script
     candidate.should == Lang::Tag('de-Qaax')
     candidate.script.should == 'Qaax'
+  end
+
+  it "does not remove script from the tag 'qaa-Latn' (privateuse language)" do
+    langtag = Lang::Tag('qaa-Latn')
+    candidate = langtag.suppress_script
+    candidate.should == Lang::Tag('qaa-Latn')
+    candidate.script.should == 'Latn'
+  end
+
+end
+
+describe Lang::Tag, "#suppress_script!" do
+
+  it "does not call #dirty when attempts to handle 'de-DE' (no changes)" do
+    langtag = Lang::Tag('de-DE')
+    langtag.should_not_receive(:dirty)
+    langtag.suppress_script!
   end
 
 end
