@@ -894,4 +894,14 @@ describe Lang::Tag, "formatting", "with #nicecase" do
 
 end
 
+describe Lang::Tag, "#variants=" do
+
+  it "attempts to set the sequence of variants via the #variants_sequence= method" do
+    tag = Lang::Tag('sl')
+    tag.should_receive(:variants_sequence=).with('rozaj-solba-1994')
+    tag.variants = 'rozaj', 'solba', 1994
+  end
+
+end
+
 # EOF

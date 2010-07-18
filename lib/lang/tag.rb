@@ -284,6 +284,19 @@ module Lang
       validate
     end
 
+    # Sets the sequence of variants for this langtag.
+    #
+    # ==== Example
+    #
+    #   tag = Lang::Tag('sl')
+    #   tag.variants = ['rozaj', 'solba', '1994']
+    #   tag.variants_sequence #=> 'rozaj-solba-1994'
+    #   tag.variants #=> ['rozaj', 'solba', '1994']
+    #
+    def variants=(subtags)
+      self.variants_sequence = Array(subtags).join(HYPHEN)
+    end
+
     # Returns a list of variants of this lantag.
     #
     attr_reader :variants
