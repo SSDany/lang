@@ -80,6 +80,12 @@ describe Lang::Tag, "#canonicalize" do
     should raise_error Lang::Tag::Canonicalization::Error, %r{Extlang "yue" requires prefix "zh"}
   end
 
+  it "raises a Canonicalization::Error when attempts to canonicalize 'qaa-yue' (bad prefix)" do
+    langtag = Lang::Tag('qaa-yue')
+    lambda { langtag.canonicalize }.
+    should raise_error Lang::Tag::Canonicalization::Error, %r{Extlang "yue" requires prefix "zh"}
+  end
+
   it "canonicalizes 'zh-cmn-Hant' to 'cmn-Hant'" do
     langtag = Lang::Tag('zh-cmn-Hant')
     canonical = langtag.canonicalize
@@ -105,6 +111,24 @@ describe Lang::Tag, "#canonicalize" do
     langtag = Lang::Tag('ru-Cyrl')
     canonical = langtag.canonicalize
     canonical.should == Lang::Tag('ru-Cyrl')
+    canonical.should be_same(langtag)
+  end
+
+  it "canonicalizes 'zh-Test' to 'zh-Pref' (preferred value of the script subtag; FAKE)" do
+
+    script = Lang::Subtags::Script.new
+    script.name = 'Test'
+    script.preferred_value = 'Pref'
+
+    preferred = Lang::Subtags::Script.new
+    preferred.name = 'Pref'
+
+    Lang::Subtags.should_receive(:Script).with('Test').twice.and_return(script)
+    Lang::Subtags.should_receive(:Script).with('Pref').once.and_return(preferred)
+
+    langtag = Lang::Tag('zh-Test')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('zh-Pref')
     canonical.should be_same(langtag)
   end
 
