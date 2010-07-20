@@ -935,4 +935,22 @@ describe Lang::Tag, "#extensions=" do
 
 end
 
+describe Lang::Tag, "#privateuse=" do
+
+  it "attempts to set the 'privateuse' sequence via the #privateuse_sequence= method" do
+    langtag = Lang::Tag('de')
+    langtag.should_receive(:privateuse_sequence=).with('x-private-use-sequence')
+    subtags = %w(private use sequence)
+    langtag.privateuse = subtags
+    subtags.should == %w(private use sequence)
+  end
+
+  it "accepts nil" do
+    langtag = Lang::Tag('de')
+    langtag.should_receive(:privateuse_sequence=).with(nil)
+    langtag.privateuse = nil
+  end
+
+end
+
 # EOF

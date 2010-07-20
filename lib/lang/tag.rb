@@ -68,6 +68,8 @@ module Lang
     HYPHEN                                = '-'.freeze
     HYPHEN_SPLITTER                       = RUBY_VERSION < '1.9.1' ? /-/.freeze : HYPHEN
 
+    PRIVATEUSE                            = 'x'.freeze
+
     LANGUAGE_REGEX                        = /^(?:#{PATTERN::LANGUAGE})$/io.freeze
     SCRIPT_REGEX                          = /^(?:#{PATTERN::SCRIPT})$/io.freeze
     REGION_REGEX                          = /^(?:#{PATTERN::REGION})$/io.freeze
@@ -421,6 +423,16 @@ module Lang
     def privateuse
       return nil unless @privateuse_sequence
       @privateuse ||= @privateuse_sequence.split(HYPHEN)[1..-1]
+    end
+
+    # Sets the 'privateuse' sequence for this langtag.
+    #
+    def privateuse=(subtags)
+      if (subtags = Array(subtags)).empty?
+        self.privateuse_sequence = nil
+      else
+        self.privateuse_sequence = [PRIVATEUSE].concat(subtags).join(HYPHEN)
+      end
     end
 
     # Sets the 'privateuse' sequence for this langtag.
