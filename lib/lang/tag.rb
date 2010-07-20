@@ -343,6 +343,16 @@ module Lang
       validate
     end
 
+    # Sets the sequence of extensions for this langtag.
+    #
+    def extensions=(subtags)
+      if (subtags = Array(subtags)).empty?
+        self.extensions_sequence = nil
+      else
+        self.extensions_sequence = subtags.join(HYPHEN)
+      end
+    end
+
     def decompose_extensions
       if @extensions_sequence
         @extensions = {}

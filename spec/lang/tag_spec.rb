@@ -897,9 +897,40 @@ end
 describe Lang::Tag, "#variants=" do
 
   it "attempts to set the sequence of variants via the #variants_sequence= method" do
-    tag = Lang::Tag('sl')
-    tag.should_receive(:variants_sequence=).with('rozaj-solba-1994')
-    tag.variants = 'rozaj', 'solba', 1994
+    langtag = Lang::Tag('sl')
+    langtag.should_receive(:variants_sequence=).with('rozaj-solba-1994')
+    langtag.variants = 'rozaj', 'solba', 1994
+  end
+
+end
+
+describe Lang::Tag, "#extensions=" do
+
+  describe "attempts to set the sequence of extensions via the #extensions_sequence= method and" do
+
+    before :each do
+      @langtag = Lang::Tag('de')
+    end
+
+    it "accepts Hashes" do
+      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk')
+      @langtag.extensions = {'u' => 'attr-co-phonebk'}
+      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk')
+      @langtag.extensions = {'u' => %w(attr co phonebk)}
+    end
+
+    it "accepts Arrays" do
+      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk-a-xxx-yyy')
+      @langtag.extensions = [['u', %w(attr co phonebk)], ['a', %w(xxx yyy)]]
+      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk-a-xxx-yyy')
+      @langtag.extensions = %w(u attr co phonebk a xxx yyy)
+    end
+
+    it "accepts nil" do
+      @langtag.should_receive(:extensions_sequence=).with(nil)
+      @langtag.extensions = nil
+    end
+
   end
 
 end
