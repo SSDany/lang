@@ -896,59 +896,86 @@ end
 
 describe Lang::Tag, "#variants=" do
 
+  before :each do
+    @langtag = Lang::Tag('sl')
+  end
+
   it "attempts to set the sequence of variants via the #variants_sequence= method" do
-    langtag = Lang::Tag('sl')
-    langtag.should_receive(:variants_sequence=).with('rozaj-solba-1994')
-    langtag.variants = 'rozaj', 'solba', 1994
+    @langtag.should_receive(:variants_sequence=).with('sequence-of-variants')
+    @langtag.variants = 'sequence-of-variants'
+  end
+
+  it "accepts Arrays" do
+    @langtag.should_receive(:variants_sequence=).with('rozaj-solba-1994')
+    @langtag.variants = 'rozaj', 'solba', 1994
+    @langtag.should_receive(:variants_sequence=).with(nil)
+    @langtag.variants = []
+  end
+
+  it "accepts nil" do
+    @langtag.should_receive(:variants_sequence=).with(nil)
+    @langtag.variants = nil
   end
 
 end
 
 describe Lang::Tag, "#extensions=" do
 
-  describe "attempts to set the sequence of extensions via the #extensions_sequence= method and" do
+  before :each do
+    @langtag = Lang::Tag('de')
+  end
 
-    before :each do
-      @langtag = Lang::Tag('de')
-    end
+  it "attempts to set the sequence of extensions via the #extensions_sequence= method and" do
+    @langtag.should_receive(:extensions_sequence=).with('extensions')
+    @langtag.extensions = 'extensions'
+  end
 
-    it "accepts Hashes" do
-      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk')
-      @langtag.extensions = {'u' => 'attr-co-phonebk'}
-      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk')
-      @langtag.extensions = {'u' => %w(attr co phonebk)}
-    end
+  it "accepts Hashes" do
+    @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk')
+    @langtag.extensions = {'u' => 'attr-co-phonebk'}
+    @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk')
+    @langtag.extensions = {'u' => %w(attr co phonebk)}
+    @langtag.should_receive(:extensions_sequence=).with(nil)
+    @langtag.extensions = {}
+  end
 
-    it "accepts Arrays" do
-      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk-a-xxx-yyy')
-      @langtag.extensions = [['u', %w(attr co phonebk)], ['a', %w(xxx yyy)]]
-      @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk-a-xxx-yyy')
-      @langtag.extensions = %w(u attr co phonebk a xxx yyy)
-    end
+  it "accepts Arrays" do
+    @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk-a-xxx-yyy')
+    @langtag.extensions = [['u', %w(attr co phonebk)], ['a', %w(xxx yyy)]]
+    @langtag.should_receive(:extensions_sequence=).with('u-attr-co-phonebk-a-xxx-yyy')
+    @langtag.extensions = %w(u attr co phonebk a xxx yyy)
+    @langtag.should_receive(:extensions_sequence=).with(nil)
+    @langtag.extensions = []
+  end
 
-    it "accepts nil" do
-      @langtag.should_receive(:extensions_sequence=).with(nil)
-      @langtag.extensions = nil
-    end
-
+  it "accepts nil" do
+    @langtag.should_receive(:extensions_sequence=).with(nil)
+    @langtag.extensions = nil
   end
 
 end
 
 describe Lang::Tag, "#privateuse=" do
 
+  before :each do
+    @langtag = Lang::Tag('de')
+  end
+
   it "attempts to set the 'privateuse' sequence via the #privateuse_sequence= method" do
-    langtag = Lang::Tag('de')
-    langtag.should_receive(:privateuse_sequence=).with('x-private-use-sequence')
-    subtags = %w(private use sequence)
-    langtag.privateuse = subtags
-    subtags.should == %w(private use sequence)
+    @langtag.should_receive(:privateuse_sequence=).with('x-privateuse-sequence')
+    @langtag.privateuse = 'privateuse-sequence'
+  end
+
+  it "accepts Arrays" do
+    @langtag.should_receive(:privateuse_sequence=).with('x-private-use-sequence')
+    @langtag.privateuse = %w(private use sequence)
+    @langtag.should_receive(:privateuse_sequence=).with(nil)
+    @langtag.privateuse = []
   end
 
   it "accepts nil" do
-    langtag = Lang::Tag('de')
-    langtag.should_receive(:privateuse_sequence=).with(nil)
-    langtag.privateuse = nil
+    @langtag.should_receive(:privateuse_sequence=).with(nil)
+    @langtag.privateuse = nil
   end
 
 end

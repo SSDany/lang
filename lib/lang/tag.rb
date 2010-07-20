@@ -183,12 +183,13 @@ module Lang
     #
     def language=(value)
       raise InvalidComponentError, "Primary subtag cannot be omitted." unless value
-      @language = value.to_str
-      if LANGUAGE_REGEX !~ @language
+      sequence = value.to_str
+      if LANGUAGE_REGEX !~ sequence
         raise InvalidComponentError, "#{value.inspect} does not conform to the 'language' ABNF."
       end
-      @primary = nil
-      @extlang = nil
+      @language = sequence
+      @primary  = nil
+      @extlang  = nil
       dirty
       validate
     end
@@ -228,11 +229,11 @@ module Lang
     # Sets the script component for this langtag.
     #
     def script=(value)
-      @script = value ? value.to_str : nil
-      if @script && SCRIPT_REGEX !~ @script
+      subtag = value ? value.to_str : nil
+      if subtag && SCRIPT_REGEX !~ subtag
         raise InvalidComponentError, "#{value.inspect} does not conform to the 'script' ABNF."
       end
-      @script = value ? value.to_str.capitalize : nil
+      @script = subtag
       dirty
       validate
     end
@@ -251,10 +252,11 @@ module Lang
     # Sets the region component for this langtag.
     #
     def region=(value)
-      @region = value ? value.to_str : nil
-      if @region && REGION_REGEX !~ @region
+      subtag = value ? value.to_str : nil
+      if subtag && REGION_REGEX !~ subtag
         raise InvalidComponentError, "#{value.inspect} does not conform to the 'region' ABNF."
       end
+      @region = subtag
       dirty
       validate
     end
@@ -277,11 +279,11 @@ module Lang
     #   tag.has_variant?('nedis') #=> false
     #
     def variants_sequence=(value)
-      @variants_sequence = value ? value.to_str : nil
-      if @variants_sequence && VARIANTS_SEQUENCE_REGEX !~ "#{HYPHEN}#{@variants_sequence}"
+      sequence = value ? value.to_str : nil
+      if sequence && VARIANTS_SEQUENCE_REGEX !~ "#{HYPHEN}#{sequence}"
         raise InvalidComponentError, "#{value.inspect} does not conform to the 'variants' ABNF."
       end
-      decompose_variants
+      set_variants_sequence(sequence)
       dirty
       validate
     end
@@ -295,27 +297,33 @@ module Lang
     #   tag.variants_sequence #=> 'rozaj-solba-1994'
     #   tag.variants #=> ['rozaj', 'solba', '1994']
     #
-    def variants=(subtags)
-      self.variants_sequence = Array(subtags).join(HYPHEN)
+    def variants=(value)
+      subtags = Array(value).flatten
+      if subtags.empty?
+        self.variants_sequence = nil
+      else
+        self.variants_sequence = subtags.join(HYPHEN)
+        @variants = subtags
+      end
     end
 
     # Returns a list of variants of this lantag.
     #
-    attr_reader :variants
+    def variants
+      return nil unless @variants_sequence
+      @variants ||= @variants_sequence.split(HYPHEN_SPLITTER)
+    end
 
-    def decompose_variants
-      if @variants_sequence
-        if @variants_sequence.downcase.split(HYPHEN_SPLITTER).uniq!
-          raise InvalidComponentError, "#{@variants_sequence.inspect} sequence includes repeated variants."
-        end
-        @variants = @variants_sequence.split(HYPHEN_SPLITTER)
-      else
-        @variants = nil
+    def set_variants_sequence(sequence)
+      if sequence && sequence.downcase.split(HYPHEN_SPLITTER).uniq!
+        raise InvalidComponentError, "#{sequence.inspect} sequence includes repeated variants."
       end
+      @variants_sequence = sequence
+      @variants = nil
       nil
     end
 
-    protected :decompose_variants
+    protected :set_variants_sequence
 
     # Checks if self has a variant or a sequence of
     # variants passed. Works case-insensitively.
@@ -336,43 +344,43 @@ module Lang
     # Sets the sequence of extensions for this langtag.
     #
     def extensions_sequence=(value)
-      @extensions_sequence = value ? value.to_str : nil
-      if @extensions_sequence && EXTENSIONS_SEQUENCE_REGEX !~ "#{HYPHEN}#{@extensions_sequence}"
+      sequence = value ? value.to_str : nil
+      if sequence && EXTENSIONS_SEQUENCE_REGEX !~ "#{HYPHEN}#{sequence}"
         raise InvalidComponentError, "#{value.inspect} does not conform to the 'extensions' ABNF."
       end
-      decompose_extensions
+      set_extensions_sequence(sequence)
       dirty
       validate
     end
 
     # Sets the sequence of extensions for this langtag.
     #
-    def extensions=(subtags)
-      if (subtags = Array(subtags)).empty?
-        self.extensions_sequence = nil
-      else
-        self.extensions_sequence = subtags.join(HYPHEN)
-      end
+    def extensions=(value)
+      subtags = Array(value).flatten
+      self.extensions_sequence = subtags.empty? ? nil : subtags.join(HYPHEN)
     end
 
-    def decompose_extensions
-      if @extensions_sequence
-        @extensions = {}
-        @extensions_sequence.split(EXTENSIONS_SEQUENCE_SPLITTER).each do |sequence|
-          k,v = sequence[0...1], sequence[2..-1] # sequence.split(HYPHEN_SPLITTER,2)
+    def set_extensions_sequence(sequence)
+      if sequence
+        exthash = {}
+        sequence.split(EXTENSIONS_SEQUENCE_SPLITTER).each do |seq|
+          k,v = seq[0...1], seq[2..-1] # sequence.split(HYPHEN_SPLITTER,2)
           k.downcase!
-          if @extensions.key?(k)
-            raise InvalidComponentError, "#{@extensions_sequence.inspect} sequence includes repeated singletons."
+          if exthash.key?(k)
+            raise InvalidComponentError, "#{sequence.inspect} sequence includes repeated singletons."
           end
-          @extensions[k] = v
+          exthash[k] = v
         end
+        @extensions_sequence = sequence
+        @extensions = exthash
       else
+        @extensions_sequence = nil
         @extensions = nil
       end
       nil
     end
 
-    protected :decompose_extensions
+    protected :set_extensions_sequence
 
     # Builds an *ordered* list of *downcased* singletons.
     #
@@ -427,21 +435,24 @@ module Lang
 
     # Sets the 'privateuse' sequence for this langtag.
     #
-    def privateuse=(subtags)
-      if (subtags = Array(subtags)).empty?
+    def privateuse=(value)
+      subtags = Array(value).flatten
+      if subtags.empty?
         self.privateuse_sequence = nil
       else
-        self.privateuse_sequence = [PRIVATEUSE].concat(subtags).join(HYPHEN)
+        self.privateuse_sequence = subtags.unshift(PRIVATEUSE).join(HYPHEN)
+        @privateuse = subtags
       end
     end
 
     # Sets the 'privateuse' sequence for this langtag.
     #
     def privateuse_sequence=(value)
-      @privateuse_sequence = value ? value.to_str : nil
-      if @privateuse_sequence && PRIVATEUSE_REGEX !~ @privateuse_sequence
+      sequence = value ? value.to_str : nil
+      if sequence && PRIVATEUSE_REGEX !~ sequence
         raise InvalidComponentError, "#{value.inspect} does not conform to the 'privateuse' ABNF."
       end
+      @privateuse_sequence = sequence
       @privateuse = nil
       dirty
       validate
@@ -693,19 +704,16 @@ module Lang
 
         dirty
 
-        @tag                  = tag
-        @primary              = nil
-        @extlang              = nil
-        @language             = $1
-        @script               = $2
-        @region               = $3
-        @variants_sequence    = $4[1..-1]
-        @extensions_sequence  = $5[1..-1]
-        @privateuse           = nil
-        @privateuse_sequence  = $'[1..-1]
-
-        decompose_variants
-        decompose_extensions
+        @tag                    = tag
+        @primary                = nil
+        @extlang                = nil
+        @language               = $1
+        @script                 = $2
+        @region                 = $3
+        set_variants_sequence     $4[1..-1]
+        set_extensions_sequence   $5[1..-1]
+        @privateuse_sequence    = $'[1..-1]
+        @privateuse             = nil
 
       else
         raise ArgumentError, "Ill-formed, grandfathered or 'privateuse' Language-Tag: #{thing.inspect}."

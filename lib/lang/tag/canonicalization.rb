@@ -173,7 +173,8 @@ module Lang #:nodoc:
         return unless @variants_sequence
 
         sequence = nil
-        @variants.map! do |variant|
+        sequence_dirty = false
+        @variants = variants.map do |variant|
 
           v = Subtags::Variant(variant)
           raise Error, "Variant #{variant.inspect} is not registered." unless v
@@ -190,7 +191,7 @@ module Lang #:nodoc:
             sequence << v.name
 
             if v.preferred_value
-              @variants_sequence = nil
+              sequence_dirty ||= true
               v.preferred_value
             else
               variant
@@ -204,7 +205,7 @@ module Lang #:nodoc:
 
         end
 
-        unless @variants_sequence
+        if sequence_dirty
           @variants_sequence = @variants.join(HYPHEN)
           dirty
         end

@@ -20,7 +20,7 @@ module Lang #:nodoc:
       VARIANT             = "[a-z\\d]{5,8}|\\d[a-z\\d]{3}"
       VARIANT_SEQUENCE    = "(?:-[a-z\\d]{5,8}|-\\d[a-z\\d]{3})"
       SINGLETON           = "[a-wy-z\\d]"
-      EXTENSION_SEQUENCE  = "(?:-#{SINGLETON}{1}(?:-[a-z\\d]{2,8})+)" #FIXME
+      EXTENSION_SEQUENCE  = "(?:-#{SINGLETON}(?:-[a-z\\d]{2,8})+)"
       PRIVATEUSE          = "x(?:-[a-z\d]{1,8})+"
 
     end
