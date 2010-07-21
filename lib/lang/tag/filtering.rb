@@ -1,7 +1,7 @@
 require 'lang/tag'
 
 module Lang #:nodoc:
-  class Tag
+  module Tag
 
     # Basic and extended filtering.
     # RFC 4647, sections 3.3.1, 3.3.2
@@ -50,7 +50,7 @@ module Lang #:nodoc:
       def matched_by_extended_range?(range)
 
         subtags = decomposition.dup
-        subranges = range.to_str.downcase.split(HYPHEN)
+        subranges = range.to_str.downcase.split(HYPHEN_SPLITTER)
 
         subrange = subranges.shift
         subtag = subtags.shift
@@ -100,25 +100,26 @@ module Lang #:nodoc:
       #   tag.matched_by_basic_range?('malformedlangtag') #=> false
       #
       def matched_by_basic_range?(range)
-        if range.kind_of?(self.class)
+        if range.kind_of?(Composition)
           s = range.composition
         elsif range.respond_to?(:to_str)
-          return true if range.to_str == WILDCARD
-          s = self.class.parse(range).composition
+          s = range.to_str.downcase
+          return true if s == WILDCARD
         else
           return false
         end
 
-        composition == s || composition.index(s + HYPHEN) == 0
-      rescue
-        false
+        composition == s ||
+        composition.index(s + HYPHEN) == 0
       end
 
       alias :has_prefix? :matched_by_basic_range?
 
     end
 
-    include Filtering
+    class Composition
+      include Filtering
+    end
 
   end
 end

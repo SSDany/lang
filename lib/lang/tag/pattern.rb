@@ -1,5 +1,5 @@
 module Lang #:nodoc:
-  class Tag
+  module Tag
 
     module PATTERN
 

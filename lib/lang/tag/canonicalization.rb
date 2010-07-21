@@ -2,14 +2,14 @@ require 'lang/tag'
 require 'lang/subtags'
 
 module Lang #:nodoc:
-  class Tag
+  module Tag
 
     module Canonicalization
 
       # Handles exceptions that might
       # appear in canonicalization or validation processes.
       #
-      class Error < Tag::Error
+      class Error < Error
       end
 
       #--
@@ -274,8 +274,7 @@ module Lang #:nodoc:
         # 2. Redundant or grandfathered tags are replaced by their 'Preferred-
         # Value', if there is one.
 
-        if ((re = Subtags::Grandfathered(composition)) && re.preferred_value) ||
-           ((re = Subtags::Redundant(composition)) && re.preferred_value)
+        if re = Subtags::Redundant(composition)
           return recompose(re.preferred_value) if re.preferred_value
         end
 
@@ -367,7 +366,9 @@ module Lang #:nodoc:
 
     end
 
-    include Canonicalization
+    class Langtag
+      include Canonicalization
+    end
 
   end
 end
