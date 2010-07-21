@@ -1,5 +1,7 @@
 require File.expand_path File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 
+require 'lang/tag/filtering'
+
 describe "language-tag 'de-DE-1996-a-xxx-b-yyy-x-private'" do
 
   before :each do

@@ -7,6 +7,7 @@ module Lang
   end
 
   # Handles the 'langtag' ABNF production.
+  #
   class Tag
 
     class Error < StandardError
@@ -64,10 +65,8 @@ module Lang
       'zh-xiang'    => 'hsn'
     ).freeze
 
-    WILDCARD                              = '*'.freeze
     HYPHEN                                = '-'.freeze
     HYPHEN_SPLITTER                       = RUBY_VERSION < '1.9.1' ? /-/.freeze : HYPHEN
-
     PRIVATEUSE                            = 'x'.freeze
 
     LANGUAGE_REGEX                        = /^(?:#{PATTERN::LANGUAGE})$/io.freeze
@@ -112,13 +111,10 @@ module Lang
         IRREGULAR.key?(snippet) || IRREGULAR.key?(snippet.downcase)
       end
 
-      # GRANDFATHERED_REGEX = /^(?:#{GRANDFATHERED.keys.join('|')})(?=-|$)/io.freeze
-
       # Checks if the +String+ passed represents a 'grandfathered' Language-Tag.
       # Works case-insensitively.
       #
       def grandfathered?(snippet)
-        # GRANDFATHERED_REGEX === snippet # zh-hakka-x-private-use ?
         GRANDFATHERED.key?(snippet) || GRANDFATHERED.key?(snippet.downcase)
       end
 
@@ -288,6 +284,7 @@ module Lang
       validate
     end
 
+    # Friendly version of the #variants_sequence=.
     # Sets the sequence of variants for this langtag.
     #
     # ==== Example
@@ -353,6 +350,7 @@ module Lang
       validate
     end
 
+    # Friendly version of the #extensions_sequence=.
     # Sets the sequence of extensions for this langtag.
     #
     def extensions=(value)
@@ -433,7 +431,14 @@ module Lang
       @privateuse ||= @privateuse_sequence.split(HYPHEN)[1..-1]
     end
 
+    # Friendly version of the #privateuse_sequence=.
     # Sets the 'privateuse' sequence for this langtag.
+    #
+    # ==== Example
+    #
+    #   tag = Lang::Tag('de')
+    #   tag.privateuse = ['private', 'use', 'sequence']
+    #   tag.privateuse_sequence #=> 'x-private-use-sequence'
     #
     def privateuse=(value)
       subtags = Array(value).flatten
@@ -457,106 +462,6 @@ module Lang
       dirty
       validate
     end
-
-    #:section: Filtering, RFC 4647, sections 3.3.1, 3.3.2
-
-    #--
-    # RFC 4647, sec. 3.3.2 ('Extended Filtering')
-    #
-    # Much like basic filtering, extended filtering selects content with
-    # arbitrarily long tags that share the same initial subtags as the
-    # language range.  In addition, extended filtering selects language
-    # tags that contain any intermediate subtags not specified in the
-    # language range.  For example, the extended language range "de-*-DE"
-    # (or its synonym "de-DE") matches all of the following tags:
-    #
-    #   de-DE (German, as used in Germany)
-    #   de-de (German, as used in Germany)
-    #   de-Latn-DE (Latin script)
-    #   de-Latf-DE (Fraktur variant of Latin script)
-    #   de-DE-x-goethe (private-use subtag)
-    #   de-Latn-DE-1996 (orthography of 1996)
-    #   de-Deva-DE (Devanagari script)
-    #
-    # The same range does not match any of the following tags for the
-    # reasons shown:
-    #
-    #   de (missing 'DE')
-    #   de-x-DE (singleton 'x' occurs before 'DE')
-    #   de-Deva ('Deva' not equal to 'DE')
-    #++
-
-    # Checks if the *extended* Language-Range (in the shortest notation)
-    # passed matches self.
-    #
-    def matched_by_extended_range?(range)
-
-      subtags = ary.dup
-      subranges = range.to_str.downcase.split(HYPHEN)
-
-      subrange = subranges.shift
-      subtag = subtags.shift
-
-      while subrange
-        if subrange == WILDCARD
-          subrange = subranges.shift
-        elsif subtag == nil
-          return false
-        elsif subtag == subrange
-          subtag = subtags.shift
-          subrange = subranges.shift
-        elsif subtag.size == 1
-          return false
-        else
-          subtag = subtags.shift
-        end
-      end
-      true
-    rescue
-      false
-    end
-
-    #--
-    # RFC 4647, sec. 3.3.1 ('Basic Filtering')
-    #
-    # A language range matches a
-    # particular language tag if, in a case-insensitive comparison, it
-    # exactly equals the tag, or if it exactly equals a prefix of the tag
-    # such that the first character following the prefix is "-".  For
-    # example, the language-range "de-de" (German as used in Germany)
-    # matches the language tag "de-DE-1996" (German as used in Germany,
-    # orthography of 1996), but not the language tags "de-Deva" (German as
-    # written in the Devanagari script) or "de-Latn-DE" (German, Latin
-    # script, as used in Germany).
-    #++
-
-    # Checks if the *basic* Language-Range passed matches self.
-    #
-    # ==== Example
-    #   tag = LanguageTag.parse('de-Latn-DE')
-    #   tag.matched_by_basic_range?('de-Latn-DE') #=> true
-    #   tag.matched_by_basic_range?('de-Latn') #=> true
-    #   tag.matched_by_basic_range?('*') #=> true
-    #   tag.matched_by_basic_range?('de-La') #=> false
-    #   tag.matched_by_basic_range?('de-de') #=> false
-    #   tag.matched_by_basic_range?('malformedlangtag') #=> false
-    #
-    def matched_by_basic_range?(range)
-      if range.kind_of?(self.class)
-        s = range.composition
-      elsif range.respond_to?(:to_str)
-        return true if range.to_str == WILDCARD
-        s = self.class.parse(range).composition
-      else
-        return false
-      end
-
-      composition == s || composition.index(s + HYPHEN) == 0
-    rescue
-      false
-    end
-
-    alias :has_prefix? :matched_by_basic_range?
 
     #:section: Comparison
 
@@ -589,8 +494,8 @@ module Lang
 
     def dirty
       @composition = nil
+      @decomposition = nil
       @tag = nil
-      @ary = nil
       nil
     end
 
@@ -656,7 +561,7 @@ module Lang
       @composition ||= to_s.downcase
     end
 
-    def tag
+    def to_s
       return @tag if @tag
       @tag = ""
       @tag << @language if @language
@@ -668,31 +573,32 @@ module Lang
       @tag
     end
 
-    alias :to_s :tag
     alias :to_str :to_s
 
-    def dup
-      self.class.new.recompose(tag)
-    end
-
     def to_a
-      tag.split(HYPHEN)
+      to_s.split(HYPHEN)
     end
 
-    def ary
-      @ary ||= composition.split(HYPHEN)
+    def decomposition
+      @decomposition ||= composition.split(HYPHEN)
     end
 
-    private :ary
+    private :decomposition
+
+    # Duplicates self.
+    #
+    def dup
+      self.class.new.recompose(to_s)
+    end
 
     def length
-      tag.length
+      to_s.length
     end
 
     # Returns the number of subtags in self.
     #
     def subtags_count
-      tag.count(HYPHEN) + 1
+      to_s.count(HYPHEN) + 1
     end
 
     def recompose(thing)

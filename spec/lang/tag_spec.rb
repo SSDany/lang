@@ -105,7 +105,7 @@ describe Lang::Tag, "'jsl'" do
 
   it "exposes a language in a composition" do
     @langtag.composition.should == 'jsl'
-    @langtag.tag.should == 'jsl'
+    @langtag.to_s.should == 'jsl'
   end
 
   it "exposes a language when inspected" do
@@ -132,7 +132,7 @@ describe Lang::Tag, "'jsl'" do
 
     it "exposes a new language in a composition" do
       @langtag.composition.should == 'sgn-jsl'
-      @langtag.tag.should == 'sgn-jsl'
+      @langtag.to_s.should == 'sgn-jsl'
     end
 
     it "exposes a new language when inspected" do
@@ -170,7 +170,7 @@ describe Lang::Tag, "'zh-Hans'" do
 
   it "exposes a script in a composition" do
     @langtag.composition.should == 'zh-hans'
-    @langtag.tag.should == 'zh-Hans'
+    @langtag.to_s.should == 'zh-Hans'
   end
 
   it "exposes a script when inspected" do
@@ -189,7 +189,7 @@ describe Lang::Tag, "'zh-Hans'" do
 
     it "exposes a new script in a composition" do
       @langtag.composition.should == 'zh-hant'
-      @langtag.tag.should == 'zh-Hant'
+      @langtag.to_s.should == 'zh-Hant'
     end
 
     it "exposes a new script when inspected" do
@@ -210,7 +210,7 @@ describe Lang::Tag, "'zh-Hans'" do
 
     it "removes an old script from a composition" do
       @langtag.composition.should == 'zh'
-      @langtag.tag.should == 'zh'
+      @langtag.to_s.should == 'zh'
     end
 
     it "does not expose a script when inspected" do
@@ -242,7 +242,7 @@ describe Lang::Tag, "'es-ES'" do
 
   it "exposes a region in a composition" do
     @langtag.composition.should == 'es-es'
-    @langtag.tag.should == 'es-ES'
+    @langtag.to_s.should == 'es-ES'
   end
 
   it "exposes a region when inspected" do
@@ -261,7 +261,7 @@ describe Lang::Tag, "'es-ES'" do
 
     it "exposes a new region in a composition" do
       @langtag.composition.should == 'es-419'
-      @langtag.tag.should == 'es-419'
+      @langtag.to_s.should == 'es-419'
     end
 
     it "exposes a new region when inspected" do
@@ -282,7 +282,7 @@ describe Lang::Tag, "'es-ES'" do
 
     it "removes an old region from a composition" do
       @langtag.composition.should == 'es'
-      @langtag.tag.should == 'es'
+      @langtag.to_s.should == 'es'
     end
 
     it "does not expose a region when inspected" do
@@ -339,7 +339,7 @@ describe Lang::Tag, "'sl-rozaj-biske-1994'" do
   end
 
   it "exposes a sequence of variants in a composition" do
-    @langtag.tag.should == 'sl-rozaj-biske-1994'
+    @langtag.to_s.should == 'sl-rozaj-biske-1994'
     @langtag.composition.should == 'sl-rozaj-biske-1994'
   end
 
@@ -384,7 +384,7 @@ describe Lang::Tag, "'sl-rozaj-biske-1994'" do
     end
 
     it "exposes a new sequence of variants in a composition" do
-      @langtag.tag.should == 'sl-Rozaj-nEDIS'
+      @langtag.to_s.should == 'sl-Rozaj-nEDIS'
       @langtag.composition.should == 'sl-rozaj-nedis'
     end
 
@@ -488,7 +488,7 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
 
   it "exposes a sequence of extensions in a composition" do
     @langtag.composition.should == 'ja-latn-hepburn-p-hyphen-v-macron-colon'
-    @langtag.tag.should == 'ja-Latn-hepburn-p-hyphen-v-macron-colon'
+    @langtag.to_s.should == 'ja-Latn-hepburn-p-hyphen-v-macron-colon'
   end
 
   it "exposes a sequence of extensions when inspected" do
@@ -532,7 +532,7 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
     it "removes an old sequence of extensions from a composition" do
       @langtag.extensions_sequence = nil
       @langtag.composition.should == 'ja-latn-hepburn'
-      @langtag.tag.should == 'ja-Latn-hepburn'
+      @langtag.to_s.should == 'ja-Latn-hepburn'
     end
 
     it "does not expose extensions when inspected" do
@@ -589,7 +589,7 @@ describe Lang::Tag, "'ja-Latn-hepburn-p-hyphen-v-macron-colon'" do
 
     it "exposes a new sequence of extensions in a composition" do
       @langtag.composition.should == "ja-latn-hepburn-v-oh-ou-oo-s-mfa"
-      @langtag.tag.should == "ja-Latn-hepburn-v-oh-ou-oo-s-MFA"
+      @langtag.to_s.should == "ja-Latn-hepburn-v-oh-ou-oo-s-MFA"
     end
 
     it "exposes a new sequence of extensions when inspected" do
@@ -619,7 +619,7 @@ describe Lang::Tag, "'el-x-koine'" do
 
   it "exposes privateuse components in a composition" do
     @langtag.composition.should == 'el-x-koine'
-    @langtag.tag.should == 'el-x-koine'
+    @langtag.to_s.should == 'el-x-koine'
   end
 
   it "exposes privateuse components when inspected" do
@@ -637,7 +637,7 @@ describe Lang::Tag, "'el-x-koine'" do
     it "removes an old privateuse sequence from a composition" do
       @langtag.privateuse_sequence = nil
       @langtag.composition.should == 'el'
-      @langtag.tag.should == 'el'
+      @langtag.to_s.should == 'el'
     end
 
     it "does not expose privateuse components when inspected" do
@@ -672,7 +672,7 @@ describe Lang::Tag, "'el-x-koine'" do
 
     it "exposes new privateuse components in a composition" do
       @langtag.composition.should == 'el-x-attic'
-      @langtag.tag.should == 'el-x-Attic'
+      @langtag.to_s.should == 'el-x-Attic'
     end
 
     it "exposes privateuse components when inspected" do
@@ -925,7 +925,7 @@ describe Lang::Tag, "#extensions=" do
     @langtag = Lang::Tag('de')
   end
 
-  it "attempts to set the sequence of extensions via the #extensions_sequence= method and" do
+  it "attempts to set the sequence of extensions via the #extensions_sequence= method" do
     @langtag.should_receive(:extensions_sequence=).with('extensions')
     @langtag.extensions = 'extensions'
   end
