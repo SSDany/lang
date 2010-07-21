@@ -15,6 +15,7 @@ module Lang #:nodoc:
       #++
 
       LANGUAGE            = "[a-z]{2,3}(?:-[a-z]{3})?|[a-z]{4,8}"
+      LOOSE_LANGUAGE      = "[a-z]{2,3}(?:-[a-z]{3}){0,3}|[a-z]{4,8}"
       SCRIPT              = "[a-z]{4}"
       REGION              = "[a-z]{2}|\\d{3}"
       VARIANT             = "[a-z\\d]{5,8}|\\d[a-z\\d]{3}"

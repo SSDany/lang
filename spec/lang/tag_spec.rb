@@ -143,15 +143,24 @@ describe Lang::Tag, "'jsl'" do
 
   describe "when assigns nil to the language" do
     it "raises an InvalidComponentError (primary subtag cannot be omitted)" do
-      lambda { @langtag.language = nil
-        }.should raise_error Lang::Tag::InvalidComponentError, %r{Primary subtag cannot be omitted}
+      lambda { @langtag.language = nil }.
+      should raise_error Lang::Tag::InvalidComponentError, %r{Primary subtag cannot be omitted}
     end
   end
 
   describe "when assigns the 'ill-formed' sequence to the language" do
     it "raises an InvalidComponentError (ill-formed sequence)" do
-      lambda { @langtag.language = 'ill-formed'
-        }.should raise_error Lang::Tag::InvalidComponentError, %r{"ill-formed" does not conform to the 'language' ABNF}
+      lambda { @langtag.language = 'ill-formed' }.
+      should raise_error Lang::Tag::InvalidComponentError,
+      %r{"ill-formed" does not conform to the 'language' ABNF or to the associated rules}
+    end
+  end
+
+  describe "when assigns the 'zh-min-nan' sequence to the language" do
+    it "raises an InvalidComponentError (there can only be one extlang in a language tag)" do
+      lambda { @langtag.language = 'zh-min-nan' }.
+      should raise_error Lang::Tag::InvalidComponentError,
+      %r{"zh-min-nan" does not conform to the 'language' ABNF or to the associated rules}
     end
   end
 
@@ -710,11 +719,6 @@ describe Lang::Tag, "#recompose" do
     lambda { @langtag.recompose(42) }.should raise_error TypeError, %r{Can't convert Fixnum into String}
   end
 
-  it "raises an ArgumentError when called with 'zh-hakka' ('grandfathered' Language-Tag)" do
-    lambda { @langtag.recompose('zh-hakka') }.
-    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
-  end
-
   it "raises an ArgumentError when called with 'i-navajo' ('grandfathered' and irregular Language-Tag)" do
     lambda { @langtag.recompose('i-navajo') }.
     should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
@@ -801,13 +805,6 @@ describe Lang::Tag, "#validate" do
   it "does not allow langtags without language" do
     lambda { @langtag.script = 'Latn'
     }.should raise_error Lang::Tag::InvalidComponentError, %r{Primary subtag cannot be omitted}
-  end
-
-  it "does not allow grandfathered langtags" do
-    lambda {
-      @langtag.language = 'zh'
-      @langtag.variants_sequence = 'hakka'
-    }.should raise_error Lang::Tag::Error, %r{Grandfathered Language-Tag: "zh-hakka"}
   end
 
 end

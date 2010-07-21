@@ -274,7 +274,8 @@ module Lang #:nodoc:
         # 2. Redundant or grandfathered tags are replaced by their 'Preferred-
         # Value', if there is one.
 
-        if re = Subtags::Redundant(composition)
+        if ((re = Subtags::Grandfathered(composition)) && re.preferred_value) ||
+           ((re = Subtags::Redundant(composition)) && re.preferred_value)
           return recompose(re.preferred_value) if re.preferred_value
         end
 

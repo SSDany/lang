@@ -14,6 +14,13 @@ describe Lang::Tag, "#canonicalize" do
     canonical.should be_same(langtag)
   end
 
+  it "canonicalizes 'zh-hakka' to 'hak' (granfathered registration)" do
+    langtag = Lang::Tag('zh-hakka')
+    canonical = langtag.canonicalize
+    canonical.should == Lang::Tag('hak')
+    canonical.should be_same(langtag)
+  end
+
   it "canonicalizes 'jsl' to 'jsl' (already in canonical form)" do
     langtag = Lang::Tag('jsl')
     canonical = langtag.canonicalize

@@ -87,7 +87,7 @@ module Lang
       /iox.freeze
 
     LANGTAG_WELLFORMEDNESS_REGEX = /^
-      (?:#{PATTERN::LANGUAGE})            (?# shortest ISO 639 code plus extlang or reserved for future use or registered language subtag)
+      (?:#{PATTERN::LOOSE_LANGUAGE})      (?# shortest ISO 639 code plus at most 3 extlangs or reserved for future use or registered language subtag)
       (?:-(?:#{PATTERN::SCRIPT}))?        (?# ISO 15924 code)
       (?:-(?:#{PATTERN::REGION}))?        (?# ISO 3166-1 code or UN M.49 code)
       (?=#{PATTERN::VARIANT_SEQUENCE}*    (?# registered variants)
@@ -181,7 +181,9 @@ module Lang
       raise InvalidComponentError, "Primary subtag cannot be omitted." unless value
       sequence = value.to_str
       if LANGUAGE_REGEX !~ sequence
-        raise InvalidComponentError, "#{value.inspect} does not conform to the 'language' ABNF."
+        raise InvalidComponentError,
+        "#{value.inspect} does not conform to the 'language' ABNF " \
+        "or to the associated rules."
       end
       @language = sequence
       @primary  = nil
@@ -512,9 +514,7 @@ module Lang
 
     def validate
       return if !!@validation_deferred
-      if self.class.grandfathered?(composition)
-        raise Error, "Grandfathered Language-Tag: #{to_s.inspect}."
-      elsif @language.nil?
+      if @language.nil?
         raise InvalidComponentError, "Primary subtag cannot be omitted."
       end
       nil
@@ -606,7 +606,7 @@ module Lang
       raise TypeError, "Can't convert #{thing.class} into String" unless thing.respond_to?(:to_str)
       tag = thing.to_str
 
-      if !self.class.grandfathered?(tag) && LANGTAG_REGEX === tag
+      if LANGTAG_REGEX === tag
 
         dirty
 
