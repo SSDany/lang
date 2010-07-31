@@ -42,7 +42,7 @@ module Lang #:nodoc:
       alias :to_str :to_s
 
       def to_a
-        to_s.split(HYPHEN)
+        to_s.split(HYPHEN_SPLITTER)
       end
 
       def decomposition
