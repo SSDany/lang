@@ -270,4 +270,58 @@ describe Lang::Tag::Composition, "#length" do
 
 end
 
+describe Lang::Tag::Composition, "#nicecase" do
+
+  it "transforms 'zh-Hakka' to 'zh-hakka'" do
+    composition = Lang::Tag::Composition.new('zh-Hakka')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('zh-hakka')
+  end
+
+  it "transforms 'en-gb-oed' to 'en-GB-oed'" do
+    composition = Lang::Tag::Composition.new('en-gb-oed')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('en-GB-oed')
+  end
+
+  it "transforms 'sgn-be-fr' to 'sgn-BE-FR'" do
+    composition = Lang::Tag::Composition.new('sgn-be-fr')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('sgn-BE-FR')
+  end
+
+  it "transforms 'sgn-be-nl' to 'sgn-BE-NL'" do
+    composition = Lang::Tag::Composition.new('sgn-be-nl')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('sgn-BE-NL')
+  end
+
+  it "transforms 'sgn-ch-de' to 'sgn-CH-DE'" do
+    composition = Lang::Tag::Composition.new('sgn-ch-de')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('sgn-CH-DE')
+  end
+
+  it "transforms 'az-latn-x-latn' to 'az-Latn-x-latn'" do
+    composition = Lang::Tag::Composition.new('az-latn-x-latn')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('az-Latn-x-latn')
+  end
+
+  it "transforms 'AZ-LATN-X-LATN' to 'az-Latn-x-latn'" do
+    composition = Lang::Tag::Composition.new('AZ-LATN-X-LATN')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('az-Latn-x-latn')
+  end
+
+  it "transforms 'en-ca-x-ca' to 'en-CA-x-ca'" do
+    composition = Lang::Tag::Composition.new('en-ca-x-ca')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('en-CA-x-ca')
+  end
+
+  it "transforms 'EN-CA-X-CA' to 'en-CA-x-ca'" do
+    composition = Lang::Tag::Composition.new('EN-CA-X-CA')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('en-CA-x-ca')
+  end
+
+  it "transforms 'en-ca-x' to 'en-CA-x' (ill-formed Composition)" do
+    composition = Lang::Tag::Composition.new('en-ca-x')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('en-CA-x')
+  end
+
+end
+
 # EOF

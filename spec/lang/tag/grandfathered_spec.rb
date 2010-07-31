@@ -21,18 +21,6 @@ describe Lang::Tag::Grandfathered, "'zh-hakka'" do
 
 end
 
-describe Lang::Tag::Grandfathered, "#nicecase" do
-  it "not yet implemented" do
-    pending { Lang::Tag::Grandfathered('zh-hakka').nicecase }
-  end
-end
-
-describe Lang::Tag::Grandfathered, "#nicecase!" do
-  it "not yet implemented" do
-    pending { Lang::Tag::Grandfathered('zh-hakka').nicecase! }
-  end
-end
-
 describe Lang::Tag::Grandfathered, "#to_langtag" do
   it "not yet implemented" do
     pending { Lang::Tag::Grandfathered('zh-hakka').to_langtag }

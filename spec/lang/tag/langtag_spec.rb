@@ -689,7 +689,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.language.should == 'de'
     candidate.primary.should == 'de'
     candidate.extlang.should == nil
-    candidate.should == Lang::Tag::Langtag('de')
+    candidate.should be_eql Lang::Tag::Langtag('de')
   end
 
   it "transforms 'zH-hAk' to 'zh-hak'" do
@@ -702,7 +702,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.language.should == 'zh-hak'
     candidate.primary.should == 'zh'
     candidate.extlang.should == 'hak'
-    candidate.should == Lang::Tag::Langtag('zh-hak')
+    candidate.should be_eql Lang::Tag::Langtag('zh-hak')
   end
 
   it "transforms 'de-De' to 'de-DE'" do
@@ -710,7 +710,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.region.should == 'De'
     candidate.nicecase!
     candidate.region.should == 'DE'
-    candidate.should == Lang::Tag::Langtag('de-DE')
+    candidate.should be_eql Lang::Tag::Langtag('de-DE')
   end
 
   it "transforms 'de-lAtN-DE' to 'de-Latn-DE'" do
@@ -718,7 +718,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.script.should == 'lAtN'
     candidate.nicecase!
     candidate.script.should == 'Latn'
-    candidate.should == Lang::Tag::Langtag('de-Latn-DE')
+    candidate.should be_eql Lang::Tag::Langtag('de-Latn-DE')
   end
 
   it "transforms 'sl-rOzAj-NeDiS' to 'sl-rozaj-nedis'" do
@@ -729,7 +729,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.nicecase!
     candidate.variants_sequence.should == 'rozaj-nedis'
     candidate.variants.should == %w(rozaj nedis)
-    candidate.should == Lang::Tag::Langtag('sl-rozaj-nedis')
+    candidate.should be_eql Lang::Tag::Langtag('sl-rozaj-nedis')
   end
 
   it "transforms 'de-U-aTtR-cO-pHoNeBk-A-eXtEnDeD' to 'de-u-attr-co-phonebk-a-extended'" do
@@ -742,7 +742,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.extensions_sequence.should == 'u-attr-co-phonebk-a-extended'
     candidate.extension('u').should == %w(attr co phonebk)
     candidate.extension('a').should == %w(extended)
-    candidate.should == Lang::Tag::Langtag('de-u-attr-co-phonebk-a-extended')
+    candidate.should be_eql Lang::Tag::Langtag('de-u-attr-co-phonebk-a-extended')
   end
 
   it "transforms 'el-X-aTtIc' to 'el-x-attic'" do
@@ -751,7 +751,7 @@ describe Lang::Tag::Langtag, "formatting", "with #nicecase!" do
     candidate.privateuse.should == %w(aTtIc)
 
     candidate.nicecase!
-    candidate.should == Lang::Tag::Langtag('el-x-attic')
+    candidate.should be_eql Lang::Tag::Langtag('el-x-attic')
     candidate.privateuse_sequence.should == 'x-attic'
     candidate.privateuse.should == %w(attic)
   end

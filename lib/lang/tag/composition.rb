@@ -67,14 +67,38 @@ module Lang #:nodoc:
         to_s.count(HYPHEN) + 1
       end
 
+      #--
+      # RFC 5646, Section 2.1.1
+      # An implementation can reproduce this format without accessing the
+      # registry as follows.  All subtags, including extension and private
+      # use subtags, use lowercase letters with two exceptions: two-letter
+      # and four-letter subtags that neither appear at the start of the tag
+      # nor occur after singletons.  Such two-letter subtags are all
+      # uppercase (as in the tags "en-CA-x-ca" or "sgn-BE-FR") and four-
+      # letter subtags are titlecase (as in the tag "az-Latn-x-latn").
+      #++
+
       def nicecase!
-        raise NotImplementedError
+        @tag.downcase!
+        @tag.gsub!(/-(?:([a-z\d]{4})|[a-z\d]{2}|[a-z\d]-.*)(?=-|$)/) do |sequence|
+          if $1
+            sequence = HYPHEN + $1.capitalize
+          elsif sequence.size == 3
+            sequence.upcase!
+          end
+          sequence
+        end
+        nil
       end
 
       def nicecase
         duplicated = self.dup
         duplicated.nicecase!
         duplicated
+      end
+
+      def inspect
+        sprintf("#<%s:%#0x %s>", self.class.to_s, self.object_id, self.to_s)
       end
 
     end

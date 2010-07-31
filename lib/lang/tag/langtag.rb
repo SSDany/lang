@@ -401,10 +401,6 @@ module Lang
 
       #:section: Miscellaneous
 
-      def inspect
-        sprintf("#<%s:%#0x %s>", self.class.to_s, self.object_id, self.to_s)
-      end
-
       def to_s
         return @tag if @tag
         @tag = ""
