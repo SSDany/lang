@@ -22,7 +22,10 @@ module Lang #:nodoc:
       end
 
       def to_langtag
-        raise NotImplementedError
+        unless pr = GRANDFATHERED[@tag.downcase]
+          raise Error, "There is no preferred value for the grandfathered Language-Tag #{@tag.inspect}."
+        end
+        Tag::Langtag(pr)
       end
 
     end

@@ -22,8 +22,22 @@ describe Lang::Tag::Grandfathered, "'zh-hakka'" do
 end
 
 describe Lang::Tag::Grandfathered, "#to_langtag" do
-  it "not yet implemented" do
-    pending { Lang::Tag::Grandfathered('zh-hakka').to_langtag }
+  Lang::Tag::GRANDFATHERED.each do |tag, preferred|
+
+    if preferred
+      it "casts '#{tag}' to the Langtag '#{preferred}'" do
+        grandfathered = Lang::Tag::Grandfathered(tag)
+        candidate = grandfathered.to_langtag
+        candidate.should be_eql Lang::Tag::Langtag(preferred)
+      end
+    else
+      it "raises an exception when attempts to cast a '#{tag}' (no preferred value)" do
+        grandfathered = Lang::Tag::Grandfathered(tag)
+        lambda { grandfathered.to_langtag }.
+        should raise_error Lang::Tag::Error, %r{no preferred value}
+      end
+    end
+
   end
 end
 
