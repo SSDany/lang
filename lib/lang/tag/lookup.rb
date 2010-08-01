@@ -28,17 +28,19 @@ module Lang #:nodoc:
       # 6. (default)
       #++
 
-      def truncate
-        raise NotImplementedError
-      end
-
-      def truncate!
-        raise NotImplementedError
+      def lookup_candidates
+        candidates = []
+        subtags = to_a
+        for i in 0..(subtags.size - 1) do
+          next if subtags[i].size == 1
+          candidates.unshift subtags[0..i].join(HYPHEN)
+        end
+        candidates
       end
 
     end
 
-    class Langtag
+    class Composition
       include Lookup
     end
 

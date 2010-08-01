@@ -2,16 +2,18 @@ require File.expand_path File.join(File.dirname(__FILE__), '..', '..', 'spec_hel
 
 require 'lang/tag/lookup'
 
-describe Lang::Tag::Lookup, "#truncate" do
-  it "not yet implemented" do
-    pending { Lang::Tag('zh-yue').truncate }
-  end
-end
+describe Lang::Tag::Lookup, "#lookup_candidates" do
 
-describe Lang::Tag::Lookup, "#truncate!" do
-  it "not yet implemented" do
-    pending { Lang::Tag('zh-yue').truncate! }
+  it "works" do
+    candidates = Lang::Tag::Langtag('zh-Hant-CN-x-private1-private2').lookup_candidates
+    candidates.size.should == 5
+    candidates[0].should == 'zh-Hant-CN-x-private1-private2'
+    candidates[1].should == 'zh-Hant-CN-x-private1'
+    candidates[2].should == 'zh-Hant-CN'
+    candidates[3].should == 'zh-Hant'
+    candidates[4].should == 'zh'
   end
+
 end
 
 # EOF
