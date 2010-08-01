@@ -84,4 +84,62 @@ describe Lang::Tag::Lookup, "#lookup_candidates", "with the custom min_subtags_c
 
 end
 
+describe Lang::Tag, "'zh-Hant-CN'" do
+
+  before :each do
+    @langtag = Lang::Tag::Langtag('zh-Hant-CN')
+  end
+
+  it "is in the range 'zh-Hant-CN'" do
+    @langtag.should be_in 'zh-Hant-CN'
+    @langtag.should be_in Lang::Tag::Composition.new('zh-Hant-CN')
+  end
+
+  it "is in the range 'zh-hant-cn' (case-insensitivity)" do
+    @langtag.should be_in 'zh-hant-cn'
+    @langtag.should be_in Lang::Tag::Composition.new('zh-hant-cn')
+  end
+
+  it "is not the range 'zh-Hant-CN-x'" do
+    @langtag.should be_in 'zh-Hant-CN-x'
+    @langtag.should be_in Lang::Tag::Composition.new('zh-Hant-CN-x')
+  end
+
+  it "is in the range 'zh-Hant-CN-x-private1'" do
+    @langtag.should be_in 'zh-Hant-CN-x-private1'
+    @langtag.should be_in Lang::Tag::Composition.new('zh-Hant-CN-x-private1')
+  end
+
+  it "is in the range 'zh-Hant-CN-x-private1-private2'" do
+    @langtag.should be_in 'zh-Hant-CN-x-private1-private2'
+    @langtag.should be_in Lang::Tag::Composition.new('zh-Hant-CN-x-private1-private2')
+  end
+
+  it "is in the range 'zh-Hant-CN-x-private1-private2'" do
+    @langtag.should be_in 'zh-Hant-CN-x-private1-private2'
+    @langtag.should be_in Lang::Tag::Composition.new('zh-Hant-CN-x-private1-private2')
+  end
+
+  it "is not in the range 'zh-Hant'" do
+    @langtag.should_not be_in 'zh-Hant'
+    @langtag.should_not be_in Lang::Tag::Composition.new('zh-Hant')
+  end
+
+  it "is not in the range 'zh-hakka'" do
+    @langtag.should_not be_in 'zh-Hakka'
+    @langtag.should_not be_in Lang::Tag::Composition.new('zh-Hant')
+  end
+
+  it "is not in the range 'zh'" do
+    @langtag.should_not be_in 'zh'
+    @langtag.should_not be_in Lang::Tag::Composition.new('zh')
+  end
+
+  it "is not in the range 'hak'" do
+    @langtag.should_not be_in 'hak'
+    @langtag.should_not be_in Lang::Tag::Composition.new('hak')
+  end
+
+end
+
 # EOF

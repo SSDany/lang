@@ -117,7 +117,23 @@ module Lang #:nodoc:
 
     end
 
-    class Composition
+    #--
+    # Filtering is defined for the language tags only.
+    #
+    # RFC 4647, Section 3.3
+    # Filtering is used to select the set of language tags
+    # that matches a given language priority list.
+    #++
+
+    class Langtag
+      include Filtering
+    end
+
+    class Grandfathered
+      include Filtering
+    end
+
+    class Privateuse
       include Filtering
     end
 

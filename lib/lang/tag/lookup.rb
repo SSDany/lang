@@ -40,9 +40,31 @@ module Lang #:nodoc:
         candidates
       end
 
+      def in?(range)
+        range = Composition === range ? range.composition : range.to_str.downcase
+        return true if composition == range
+        range.index(composition) == 0
+      end
+
     end
 
-    class Composition
+    #--
+    # Lookup is defined for the Language-Tags only.
+    #
+    # RFC 4647, Section 3.4
+    # Lookup is used to select the single language tag that best matches
+    # the language priority list for a given request.
+    #++
+
+    class Langtag
+      include Lookup
+    end
+
+    class Grandfathered
+      include Lookup
+    end
+
+    class Privateuse
       include Lookup
     end
 

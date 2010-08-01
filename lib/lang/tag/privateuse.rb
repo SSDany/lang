@@ -18,7 +18,7 @@ module Lang #:nodoc:
         unless Lang::Tag.privateuse?(sequence)
           raise ArgumentError, "#{sequence.inspect} is not a privateuse Language-Tag"
         end
-        super(sequence)
+        @tag = sequence
       end
 
       def nicecase!

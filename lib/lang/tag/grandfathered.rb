@@ -18,7 +18,7 @@ module Lang #:nodoc:
         unless Lang::Tag.grandfathered?(sequence)
           raise ArgumentError, "#{sequence.inspect} is not a grandfathered Language-Tag"
         end
-        super(sequence)
+        @tag = sequence
       end
 
       def to_langtag
