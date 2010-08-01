@@ -28,10 +28,12 @@ module Lang #:nodoc:
       # 6. (default)
       #++
 
-      def lookup_candidates
-        candidates = []
+      def lookup_candidates(min_subtags_count = 1)
         subtags = to_a
-        for i in 0..(subtags.size - 1) do
+        return nil if min_subtags_count < 1 || subtags.size < min_subtags_count
+
+        candidates = []
+        for i in (min_subtags_count - 1)..(subtags.size - 1) do
           next if subtags[i].size == 1
           candidates.unshift subtags[0..i].join(HYPHEN)
         end
