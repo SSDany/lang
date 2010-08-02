@@ -7,6 +7,7 @@ require ROOT + 'lib/lang/version'
 
 require ROOT + 'tasks/spec'
 require ROOT + 'tasks/doc'
+require ROOT + 'tasks/benchmarks'
 
 task :default => :spec
 
