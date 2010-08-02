@@ -167,7 +167,7 @@ module Lang #:nodoc:
 
       # Canonicalizes variants, applying rules that described in RFC 5646,
       # sections 2.2.5 and 4.5. Also validates the sequence of variants
-      # using 'Prefix' field-values (see RFC 5646, section 3.1.8).
+      # using 'Prefix' field-values (see RFC 5646, Section 3.1.8).
       #
       def canonicalize_variants
         return unless @variants_sequence

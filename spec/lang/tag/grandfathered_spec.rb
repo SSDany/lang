@@ -4,7 +4,7 @@ describe Lang::Tag, ".Grandfathered" do
 
   it "does not allow to create non-grandfathered tags" do
     lambda { Lang::Tag::Grandfathered('non-grandfathered') }.
-    should raise_error ArgumentError, %r{is not a grandfathered Language-Tag}
+    should raise_error ArgumentError, %r{is not a grandfathered language tag}
   end
 
 end

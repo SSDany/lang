@@ -8,7 +8,8 @@ module Lang
       Langtag.new(thing)
     end
 
-    # Handles the 'langtag' production.
+    # Handles the 'langtag' production
+    # i.e normal language tags.
     #
     class Langtag < Composition
 
@@ -342,10 +343,8 @@ module Lang
       #:section: Validation
 
       def dirty
-        @composition = nil
-        @decomposition = nil
-        @tag = nil
-        nil
+        @sequence = nil
+        super
       end
 
       private :dirty
@@ -396,21 +395,21 @@ module Lang
         @privateuse = nil if @privateuse_sequence &&
           @privateuse_sequence.downcase!
 
-        @tag = nil
+        @sequence = nil
       end
 
       #:section: Miscellaneous
 
       def to_s
-        return @tag if @tag
-        @tag = ""
-        @tag << @language if @language
-        @tag << HYPHEN << @script if @script
-        @tag << HYPHEN << @region if @region
-        @tag << HYPHEN << @variants_sequence if @variants_sequence
-        @tag << HYPHEN << @extensions_sequence if @extensions_sequence
-        @tag << HYPHEN << @privateuse_sequence if @privateuse_sequence
-        @tag
+        return @sequence if @sequence
+        @sequence = ""
+        @sequence << @language if @language
+        @sequence << HYPHEN << @script if @script
+        @sequence << HYPHEN << @region if @region
+        @sequence << HYPHEN << @variants_sequence if @variants_sequence
+        @sequence << HYPHEN << @extensions_sequence if @extensions_sequence
+        @sequence << HYPHEN << @privateuse_sequence if @privateuse_sequence
+        @sequence
       end
 
       def recompose(thing)
@@ -422,7 +421,7 @@ module Lang
 
           dirty
 
-          @tag                    = tag
+          @sequence               = tag
           @primary                = nil
           @extlang                = nil
           @language               = $1
@@ -434,7 +433,7 @@ module Lang
           @privateuse             = nil
 
         else
-          raise ArgumentError, "Ill-formed, grandfathered or 'privateuse' Language-Tag: #{thing.inspect}."
+          raise ArgumentError, "Ill-formed, grandfathered or 'privateuse' language tag: #{thing.inspect}."
         end
         self
       end

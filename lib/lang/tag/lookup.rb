@@ -3,6 +3,9 @@ require 'lang/tag'
 module Lang #:nodoc:
   module Tag
 
+    # Lookup.
+    # RFC 4647, Section 3.4.
+    #
     module Lookup
 
       #--
@@ -49,7 +52,7 @@ module Lang #:nodoc:
     end
 
     #--
-    # Lookup is defined for the Language-Tags only.
+    # Lookup is defined for the language tags only.
     #
     # RFC 4647, Section 3.4
     # Lookup is used to select the single language tag that best matches

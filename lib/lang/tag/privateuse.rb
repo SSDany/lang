@@ -16,13 +16,13 @@ module Lang #:nodoc:
         raise TypeError, "Can't convert #{thing.class} into String" unless thing.respond_to?(:to_str)
         sequence = thing.to_str
         unless Lang::Tag.privateuse?(sequence)
-          raise ArgumentError, "#{sequence.inspect} is not a privateuse Language-Tag"
+          raise ArgumentError, "#{sequence.inspect} is not a privateuse language tag"
         end
-        @tag = sequence
+        @sequence = sequence
       end
 
       def nicecase!
-        @tag.downcase!
+        @sequence.downcase!
         nil
       end
 

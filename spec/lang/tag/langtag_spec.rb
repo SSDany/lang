@@ -610,20 +610,20 @@ describe Lang::Tag::Langtag, "#recompose" do
     lambda { @langtag.recompose(42) }.should raise_error TypeError, %r{Can't convert Fixnum into String}
   end
 
-  it "raises an ArgumentError when called with 'i-navajo' ('grandfathered' and irregular Language-Tag)" do
+  it "raises an ArgumentError when called with 'i-navajo' ('grandfathered' and irregular language tag)" do
     lambda { @langtag.recompose('i-navajo') }.
-    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' language tag}
   end
 
-  it "raises an ArgumentError when called with 'x-private-sequence' ('privateuse' Language-Tag)" do
+  it "raises an ArgumentError when called with 'x-private-sequence' ('privateuse' language tag)" do
     lambda { @langtag.recompose('x-private-sequence') }.
-    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+    should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' language tag}
   end
 
   suite('www.langtag.net/broken-tags.txt') do |snippet,_|
-    it "raises an ArgumentError when called with '#{snippet}' (ill-formed Language-Tag)" do
+    it "raises an ArgumentError when called with '#{snippet}' (ill-formed language tag)" do
       lambda { @langtag.recompose(snippet) }.
-      should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' Language-Tag}
+      should raise_error ArgumentError, %r{Ill-formed, grandfathered or 'privateuse' language tag}
     end
   end
 

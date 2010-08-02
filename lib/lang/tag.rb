@@ -7,7 +7,7 @@ require 'lang/tag/privateuse'
 module Lang
 
   def self.Tag(thing)
-    return thing if Tag::Composition === thing
+    #return thing if Tag::Composition === thing
     Tag::Grandfathered(thing) rescue
     Tag::Langtag(thing) rescue
     Tag::Privateuse(thing)
@@ -103,14 +103,14 @@ module Lang
 
     class << self
 
-      # Checks if the +String+ passed represents a 'privateuse' Language-Tag.
+      # Checks if the +String+ passed represents a 'privateuse' language tag.
       # Works case-insensitively.
       #
       def privateuse?(snippet)
         PRIVATEUSE_REGEX === snippet
       end
 
-      # Checks if the +String+ passed represents a 'grandfathered' Language-Tag.
+      # Checks if the +String+ passed represents a 'grandfathered' language tag.
       # Works case-insensitively.
       #
       def grandfathered?(snippet)
@@ -118,7 +118,7 @@ module Lang
       end
 
       #--
-      # RFC 5646, sec. 2.2.9:
+      # RFC 5646, Section 2.2.9:
       # A tag is considered "well-formed" if it conforms to the ABNF
       # (Section 2.1). Language tags may be well-formed in terms of syntax
       # but not valid in terms of content. However, many operations
@@ -126,7 +126,7 @@ module Lang
       # meaning or validity of the subtags.
       #++
 
-      # Checks if the +String+ passed represents a well-formed Language-Tag.
+      # Checks if the +String+ passed represents a well-formed language tag.
       # Works case-insensitively.
       #
       def wellformed?(snippet)

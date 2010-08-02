@@ -322,6 +322,16 @@ describe Lang::Tag::Composition, "#nicecase" do
     composition.nicecase.should be_eql Lang::Tag::Composition.new('en-CA-x')
   end
 
+  it "transforms 'en-*-ca' to 'en-*-CA'" do
+    composition = Lang::Tag::Composition.new('en-*-ca')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('en-*-CA')
+  end
+
+  it "transforms 'en-*-ca-x-CA' to 'en-*-CA-x-ca'" do
+    composition = Lang::Tag::Composition.new('en-*-ca-x-CA')
+    composition.nicecase.should be_eql Lang::Tag::Composition.new('en-*-CA-x-ca')
+  end
+
 end
 
 # EOF

@@ -1,12 +1,37 @@
 module Lang #:nodoc:
   module Tag
+
+    # Handles abstract compositions of subtags
+    # incl. basic and extended language-ranges.
+    #
+    # ==== Example
+    #
+    #   class LanguageRange < Lang::Tag::Composition
+    #
+    #     def initialize(thing)
+    #       raise TypeError, "Can't convert #{thing.class} into String" unless thing.respond_to?(:to_str)
+    #       sequence = thing.to_str
+    #       unless /^(?:\*|[a-z]{1,8})(?:-[a-z\d]{1,8}|-\*)*$/i === sequence
+    #         raise Error, "#{sequence.inspect} is not a language-range."
+    #       end
+    #       @sequence = sequence
+    #     end
+    #
+    #     def simplify! # to basic language-range
+    #       /^\*-/ === @sequence ? @sequence = '*' : @sequence.gsub!('-*','')
+    #       dirty
+    #     end
+    #
+    #   end
+    #
     class Composition
 
-      def initialize(sequence)
-        @tag = sequence
+      def initialize(thing)
+        raise TypeError, "Can't convert #{thing.class} into String" unless thing.respond_to?(:to_str)
+        @sequence = thing.to_str
       end
 
-      # Returns +true+ if language-tags are equal.
+      # Returns +true+ if compositions are equal.
       # Allows comparison against +Strings+.
       #
       def ===(other)
@@ -15,7 +40,7 @@ module Lang #:nodoc:
         composition == s || composition == s.downcase
       end
 
-      # Returns +true+ if Lang::Tag objects are equal.
+      # Returns +true+ if Compositions are equal.
       #
       def ==(other)
         return false unless other.kind_of?(self.class)
@@ -36,7 +61,7 @@ module Lang #:nodoc:
       end
 
       def to_s
-        @tag
+        @sequence
       end
 
       alias :to_str :to_s
@@ -50,6 +75,14 @@ module Lang #:nodoc:
       end
 
       private :decomposition
+
+      def dirty
+        @composition = nil
+        @decomposition = nil
+        nil
+      end
+
+      private :dirty
 
       # Duplicates self.
       #
@@ -79,8 +112,8 @@ module Lang #:nodoc:
       #++
 
       def nicecase!
-        @tag.downcase!
-        @tag.gsub!(/-(?:([a-z\d]{4})|[a-z\d]{2}|[a-z\d]-.*)(?=-|$)/) do |sequence|
+        @sequence.downcase!
+        @sequence.gsub!(/-(?:([a-z\d]{4})|[a-z\d]{2}|[a-z\d]-.*)(?=-|$)/) do |sequence|
           if $1
             sequence = HYPHEN + $1.capitalize
           elsif sequence.size == 3

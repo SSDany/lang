@@ -16,16 +16,16 @@ module Lang #:nodoc:
         raise TypeError, "Can't convert #{thing.class} into String" unless thing.respond_to?(:to_str)
         sequence = thing.to_str
         unless Lang::Tag.grandfathered?(sequence)
-          raise ArgumentError, "#{sequence.inspect} is not a grandfathered Language-Tag"
+          raise ArgumentError, "#{sequence.inspect} is not a grandfathered language tag"
         end
-        @tag = sequence
+        @sequence = sequence
       end
 
       def to_langtag
-        unless pr = GRANDFATHERED[@tag.downcase]
-          raise Error, "There is no preferred value for the grandfathered Language-Tag #{@tag.inspect}."
+        unless preferred_value = GRANDFATHERED[@sequence.downcase]
+          raise Error, "There is no preferred value for the grandfathered language tag #{@sequence.inspect}."
         end
-        Tag::Langtag(pr)
+        Tag::Langtag(preferred_value)
       end
 
     end

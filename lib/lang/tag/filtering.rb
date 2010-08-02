@@ -4,14 +4,14 @@ module Lang #:nodoc:
   module Tag
 
     # Basic and extended filtering.
-    # RFC 4647, sections 3.3.1, 3.3.2
+    # RFC 4647, Sections 3.3.1, 3.3.2.
     #
     module Filtering
 
       WILDCARD = '*'.freeze
 
       #--
-      # RFC 4647, sec. 3.3.2 ('Extended Filtering')
+      # RFC 4647, Section 3.3.2 ('Extended Filtering')
       #
       # Much like basic filtering, extended filtering selects content with
       # arbitrarily long tags that share the same initial subtags as the
@@ -36,7 +36,7 @@ module Lang #:nodoc:
       #   de-Deva ('Deva' not equal to 'DE')
       #++
 
-      # Checks if the *extended* Language-Range (in the shortest notation)
+      # Checks if the *extended* language-range (in the shortest notation)
       # passed matches self.
       #
       # ==== Example
@@ -75,7 +75,7 @@ module Lang #:nodoc:
       end
 
       #--
-      # RFC 4647, sec. 3.3.1 ('Basic Filtering')
+      # RFC 4647, Section 3.3.1 ('Basic Filtering')
       #
       # A language range matches a
       # particular language tag if, in a case-insensitive comparison, it
@@ -88,7 +88,7 @@ module Lang #:nodoc:
       # script, as used in Germany).
       #++
 
-      # Checks if the *basic* Language-Range passed matches self.
+      # Checks if the *basic* language-range passed matches self.
       #
       # ==== Example
       #   tag = Lang::Tag('de-Latn-DE')

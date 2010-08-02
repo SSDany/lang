@@ -4,7 +4,7 @@ describe Lang::Tag, ".Privateuse" do
 
   it "does not allow to create non-privateuse tags" do
     lambda { Lang::Tag::Privateuse('non-privateuse') }.
-    should raise_error ArgumentError, %r{is not a privateuse Language-Tag}
+    should raise_error ArgumentError, %r{is not a privateuse language tag}
   end
 
 end
