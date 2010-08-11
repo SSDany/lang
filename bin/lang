@@ -15,7 +15,7 @@ module Lang
       TYPE_REGEX = /^#{TYPE}:\s*(\w+)\s*$/io.freeze
 
       def initialize(path)
-        @path = path
+        @path = File.expand_path(path)
       end
 
       def exists?
@@ -54,11 +54,28 @@ module Lang
       private
 
       def write(dest, &block)
+
+        path = "#{@path}.#{dest}"
         temp = Tempfile.new(dest)
         temp.binmode
         yield(temp) if block_given?
         temp.close
+
+        # somewhat stolen from ActiveSupport
+
+        begin
+          old = File.stat(path)
+        rescue Errno::ENOENT
+          check = File.join(File.dirname(path), ".permissions_check.#{Thread.current.object_id}.#{Process.pid}.#{rand(1000000)}")
+          File.open(check, File::WRONLY | File::CREAT) { }
+          old = File.stat(check)
+          File.unlink(check)
+        end
+
         FileUtils.mv(temp.path, "#{@path}.#{dest}")
+
+        File.chown(old.uid, old.gid, path)
+        File.chmod(old.mode, path)
         nil
       end
 
@@ -129,10 +146,7 @@ if __FILE__ == $0
   end
 
   registry = Lang::Subtags::Registry.new(ARGV.shift || Lang::Subtags.registry_path)
-
-  if command == 'update' || !registry.exists?
-    registry.download(URI("http://www.iana.org/assignments/language-subtag-registry"))
-  end
+  registry.download(URI("http://www.iana.org/assignments/language-subtag-registry")) if command == 'update' || !registry.exists?
   registry.build_indices
 
 end
