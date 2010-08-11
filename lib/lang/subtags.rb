@@ -112,7 +112,7 @@ module Lang #:nodoc:
     end
 
     def registry_path
-      @registry_path ||= File.join(File.dirname(__FILE__), "data", "language-subtags")
+      @registry_path ||= File.join(File.dirname(__FILE__), "data", "language-subtag")
     end
 
     def registry

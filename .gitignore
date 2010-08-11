@@ -1,6 +1,8 @@
 coverage/*
 tmp/*
 doc/*
+spec/data/*
+!spec/data/language-subtag.gzip
 
 # registry
 lib/lang/data

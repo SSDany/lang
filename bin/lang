@@ -14,7 +14,7 @@ module Lang
       NAME_REGEX = /^(?:#{SUBTAG}|#{TAG}):\s*([\w-]+)\s*$/io.freeze
       TYPE_REGEX = /^#{TYPE}:\s*(\w+)\s*$/io.freeze
 
-      def initialize(path = Lang::Subtags.registry_path)
+      def initialize(path)
         @path = path
       end
 
@@ -128,7 +128,7 @@ if __FILE__ == $0
     exit 1
   end
 
-  registry = Lang::Subtags::Registry.new
+  registry = Lang::Subtags::Registry.new(ARGV.shift || Lang::Subtags.registry_path)
 
   if command == 'update' || !registry.exists?
     registry.download(URI("http://www.iana.org/assignments/language-subtag-registry"))

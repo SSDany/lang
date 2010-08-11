@@ -6,8 +6,22 @@ begin
 
     JRUBY = RUBY_PLATFORM =~ /java/
 
+    require 'zlib'
+
+    task :prepare do
+      target = ROOT + 'spec/data/language-subtag'
+      if %w(indices boundaries registry).any? { |ext| !File.exists?("#{target}.#{ext}") }
+        File.open("#{target}.gzip", File::RDONLY) do |source|
+          gz = Zlib::GzipReader.new(source)
+          File.open("#{target}.registry", File::WRONLY | File::CREAT) { |f| f.write gz.read }
+          gz.close
+        end
+        Dir.chdir(ROOT) { `bin/lang reindex #{target}` }
+      end
+    end
+
     def run_spec(name, files, rcov)
-      Spec::Rake::SpecTask.new(name) do |t|
+      Spec::Rake::SpecTask.new(name => 'spec:prepare') do |t|
         t.spec_opts << '--options' << 'spec/spec.opts' if File.exists?('spec/spec.opts')
         t.spec_files = Pathname.glob(ENV['FILES'] || files.to_s).map{|f| f.to_s}
         t.rcov = rcov && !JRUBY

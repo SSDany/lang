@@ -5,7 +5,7 @@ module RegistryHelper
     klasses = Lang::Subtags::Entry.subclasses & klasses
 
     before :all do
-      #Lang::Subtags.stub!(:registry_path).and_return(FIXTURES_DIR.join('fake/language-subtags'))
+      Lang::Subtags.stub!(:registry_path).and_return(SPEC_ROOT.join('data/language-subtag'))
     end
 
     before :all do
