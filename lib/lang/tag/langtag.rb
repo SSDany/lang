@@ -13,8 +13,6 @@ module Lang
     #
     class Langtag < Composition
 
-      #:section: Components
-
       attr_reader :language, :script, :region, :variants_sequence, :extensions_sequence, :privateuse_sequence
 
       def initialize(thing = nil)
@@ -340,8 +338,6 @@ module Lang
         validate
       end
 
-      #:section: Validation
-
       def dirty
         @sequence = nil
         super
@@ -367,8 +363,6 @@ module Lang
       end
 
       private :validate
-
-      #:section: Formatting
 
       def nicecase!
 
@@ -397,8 +391,6 @@ module Lang
 
         @sequence = nil
       end
-
-      #:section: Miscellaneous
 
       def to_s
         return @sequence if @sequence

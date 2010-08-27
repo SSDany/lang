@@ -1,9 +1,14 @@
 begin
 
   begin
-    require 'hanna/rdoctask'
-  rescue LoadError
     require 'rake/rdoctask'
+  rescue LoadError
+    abort
+  end
+
+  begin
+    require 'sdoc'
+  rescue LoadError
   end
 
   desc 'Build RDoc'
@@ -11,7 +16,15 @@ begin
     rdoc.rdoc_dir = "doc"
     rdoc.main     = "README.rdoc"
     rdoc.title    = "Lang #{Lang::VERSION} Documentation"
-    rdoc.options  << "--charset" << "utf-8" << "--force-update" << "--line-numbers"
+    rdoc.options  << "--charset" << "utf-8" << "--force-update"
+
+    if defined? SDoc
+      rdoc.options << "--fmt" << "shtml"
+      rdoc.template = "direct"
+    else
+      rdoc.options << "--line-numbers"
+    end
+
     rdoc.rdoc_files.add FileList['lib/**/*.rb', 'README.rdoc']
   end
 
