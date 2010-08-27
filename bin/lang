@@ -81,7 +81,7 @@ module Lang
 
       def http(uri)
         STDOUT << "Downloading #{uri}\n"
-        Net::HTTP.get_response(uri) do |response|
+        Net::HTTP.get_response(URI(uri)) do |response|
           total, size = response['Content-Length'].to_i, 0
           response.read_body do |chunk|
             size += chunk.size
@@ -137,18 +137,14 @@ module Lang
   end
 end
 
-if __FILE__ == $0
-
-  command = ARGV.shift
-  unless %w(reindex update).include?(command)
-    STDERR << "unknown command: #{command.inspect}\n"
-    exit 1
-  end
-
-  registry = Lang::Subtags::Registry.new(ARGV.shift || Lang::Subtags.registry_path)
-  registry.download(URI("http://www.iana.org/assignments/language-subtag-registry")) if command == 'update' || !registry.exists?
-  registry.build_indices
-
+command = ARGV.shift
+unless %w(reindex update).include?(command)
+  STDERR << "unknown command: #{command.inspect}\n"
+  exit 1
 end
+
+registry = Lang::Subtags::Registry.new(ARGV.shift || Lang::Subtags.registry_path)
+registry.download("http://www.iana.org/assignments/language-subtag-registry") if command == 'update' || !registry.exists?
+registry.build_indices
 
 # EOF

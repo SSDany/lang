@@ -1,14 +1,24 @@
 == DESCRIPTION:
 
-LanguageTags implementation.
+Language tags implementation.
 
 == FEATURES:
 
 * RFC5646 conformance
 * Basic filtering (RFC 4647)
 * Extended filtering (RFC 4647)
+* Canonicalization
+* Direct work with IANA language subtag registry
 
 == EXAMPLES:
+
+  See examples directory:
+  http://github.com/SSDany/lang/tree/master/examples
+
+== INSTALLATION:
+
+  $ gem in lang
+  $ lang update
 
 == LICENSE:
 
