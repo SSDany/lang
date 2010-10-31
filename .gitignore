@@ -9,5 +9,4 @@ lib/lang/data
 
 # bundler
 .bundle
-Gemfile.lock
 vendor/cache

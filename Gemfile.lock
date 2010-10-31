@@ -1,0 +1,39 @@
+GIT
+  remote: git://github.com/somebee/rbench.git
+  revision: c38daa2be5ad91dea29659ffb2170e0a8131698c
+  specs:
+    rbench (0.2.4)
+
+GEM
+  remote: http://gemcutter.org/
+  specs:
+    composite (0.3.0)
+    diff-lcs (1.1.2)
+    langtag (0.1.0)
+      composite (>= 0.3.0)
+    locale (2.0.5)
+    rake (0.8.7)
+    rcov (0.9.9)
+    rspec (2.0.1)
+      rspec-core (~> 2.0.1)
+      rspec-expectations (~> 2.0.1)
+      rspec-mocks (~> 2.0.1)
+    rspec-core (2.0.1)
+    rspec-expectations (2.0.1)
+      diff-lcs (>= 1.1.2)
+    rspec-mocks (2.0.1)
+      rspec-core (~> 2.0.1)
+      rspec-expectations (~> 2.0.1)
+    thor (0.14.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  langtag (>= 0.1.0)
+  locale (>= 2.0.5)
+  rake
+  rbench!
+  rcov
+  rspec (>= 2.0.0)
+  thor

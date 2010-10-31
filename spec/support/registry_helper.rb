@@ -5,12 +5,12 @@ module RegistryHelper
     klasses = Lang::Subtags::Entry.subclasses & klasses
 
     before :all do
-      Lang::Subtags.stub!(:registry_path).and_return(SPEC_ROOT.join('data/language-subtag'))
-    end
-
-    before :all do
       @entries = {}
       klasses.each { |klass| @entries[klass] = {} }
+    end
+
+    before :each do
+      Lang::Subtags.stub!(:registry_path).and_return(SPEC_ROOT.join('data/language-subtag'))
     end
 
     before :each do

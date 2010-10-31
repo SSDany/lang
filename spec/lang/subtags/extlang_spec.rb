@@ -7,7 +7,7 @@ describe Lang::Subtags::Extlang, "'hak'" do
   extend RegistryHelper
   stub_memoization_for Lang::Subtags::Language, Lang::Subtags::Extlang
 
-  before :all do
+  before :each do
     @extlang = Lang::Subtags::Extlang('hak')
   end
 

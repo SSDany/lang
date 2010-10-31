@@ -2,7 +2,7 @@ begin
 
   namespace :spec do
 
-    require 'spec/rake/spectask'
+    require 'rspec/core/rake_task'
 
     JRUBY = RUBY_PLATFORM =~ /java/
 
@@ -21,14 +21,15 @@ begin
     end
 
     def run_spec(name, files, rcov)
-      Spec::Rake::SpecTask.new(name => 'spec:prepare') do |t|
-        t.spec_opts << '--options' << 'spec/spec.opts' if File.exists?('spec/spec.opts')
-        t.spec_files = Pathname.glob(ENV['FILES'] || files.to_s).map{|f| f.to_s}
+      RSpec::Core::RakeTask.new(name => 'spec:prepare') do |t|
+        t.rspec_opts = ['-c', '-f progress']
+        t.pattern = files
         t.rcov = rcov && !JRUBY
+        t.rcov_opts = []
         t.rcov_opts << '--exclude' << 'spec' << '--exclude' << 'gems'
         t.rcov_opts << '--text-report'
         t.rcov_opts << '--sort' << 'coverage' << '--sort-reverse'
-        t.rcov_dir = 'coverage'
+        #t.rcov_dir = 'coverage'
       end
     end
 
@@ -46,8 +47,8 @@ begin
 
   task :clobber => "spec:clobber_rcov" if Rake::Task.task_defined? 'spec:clobber_rcov'
 
-rescue LoadError
-  abort 'rspec not installed'
+#rescue LoadError
+#  abort 'rspec not installed'
 end
 
 # EOF

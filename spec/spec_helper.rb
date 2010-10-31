@@ -1,22 +1,18 @@
 require 'pathname'
 require 'rubygems'
 
-begin
+require 'bundler'
+Bundler.require(:default, :development)
 
-  gem 'rspec', '>=1.2'
-  require 'spec'
+SPEC_ROOT = Pathname(__FILE__).dirname.expand_path
+FIXTURES_DIR = SPEC_ROOT.join('fixtures')
 
-  SPEC_ROOT = Pathname(__FILE__).dirname.expand_path
-  FIXTURES_DIR = SPEC_ROOT.join('fixtures')
-  require SPEC_ROOT + 'support/suite'
-  require SPEC_ROOT + 'support/registry_helper'
+dir = SPEC_ROOT.parent.join('lib').to_s
+$:.unshift(dir) unless $:.include?(dir)
+require 'lang/subtags'
+require 'lang/tag'
 
-  dir = SPEC_ROOT.parent.join('lib').to_s
-  $:.unshift(dir) unless $:.include?(dir)
-  require 'lang/subtags'
-  require 'lang/tag'
-
-rescue LoadError
-end
+require SPEC_ROOT + 'support/suite'
+require SPEC_ROOT + 'support/registry_helper'
 
 # EOF

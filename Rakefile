@@ -1,6 +1,6 @@
 require 'pathname'
 require 'rubygems'
-require 'rake'
+require 'bundler/setup'
 
 ROOT = Pathname(__FILE__).dirname.expand_path
 require ROOT + 'lib/lang/version'
