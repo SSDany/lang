@@ -18,7 +18,7 @@ Language tags implementation.
 == INSTALLATION:
 
   $ gem in lang
-  $ lang update
+  $ lang index -u
 
 == LICENSE:
 

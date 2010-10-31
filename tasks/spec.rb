@@ -16,7 +16,7 @@ begin
           File.open("#{target}.registry", File::WRONLY | File::CREAT) { |f| f.write gz.read }
           gz.close
         end
-        Dir.chdir(ROOT) { `bin/lang reindex #{target}` }
+        Dir.chdir(ROOT) { `bin/lang index #{target} -q` }
       end
     end
 
