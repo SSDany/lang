@@ -1,7 +1,7 @@
-GEMSPEC = Gem::Specification.new do |s|
+Gem::Specification.new do |s|
 
   s.name = 'lang'
-  s.version = '0.1.0.pre'
+  s.version = '0.1.0'
   s.platform = Gem::Platform::RUBY
 
   s.authors = %w[SSDany]
@@ -21,6 +21,7 @@ DESCR
   s.has_rdoc = true
   s.extra_rdoc_files = %w(README.rdoc)
   s.files = s.extra_rdoc_files + [
+    "lib/lang/cli.rb",
     "lib/lang/subtags/entry.rb",
     "lib/lang/subtags/extlang.rb",
     "lib/lang/subtags/grandfathered.rb",
@@ -42,7 +43,8 @@ DESCR
     "lib/lang/version.rb"
   ]
 
-  s.add_development_dependency "rspec", ">= 1.2.0"
+  s.add_dependency "thor"
+  s.add_development_dependency "rspec", ">= 2.0.0"
   s.rubyforge_project = 'lang'
 end
 
